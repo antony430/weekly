@@ -320,7 +320,7 @@ const content = {
   },
 };
 
-const LEGACY_NEWSLETTER_DATA_URL = "/assets/legacy-newsletters.json";
+const LEGACY_NEWSLETTER_DATA_URL = "assets/legacy-newsletters.json";
 const DAILY_NEWSLETTER_CACHE_KEY = "newming-weekly-daily-latest";
 
 let legacyNewsletters = [];
@@ -720,7 +720,7 @@ function normalizeNewsletterIssue(issue) {
     bundle: { ko: "발행본", en: "Issue" },
     href: getNewsletterDetailUrl(issue),
     detailKey: issue.campaignKey || issue.id,
-    image: issue.coverImageUrl || "/assets/newming-weekly-icon.png",
+    image: issue.coverImageUrl || "assets/newming-weekly-icon.png",
     sentAt: issue.sentAt,
   };
 }
@@ -776,7 +776,7 @@ function renderHeroPreview() {
   const title = first.title?.[currentLanguage] || first.title?.ko || "";
   const summary = first.summary?.[currentLanguage] || first.summary?.ko || "";
   const date = first.date || "";
-  const image = first.image || "/assets/newming-weekly-icon.png";
+  const image = first.image || "assets/newming-weekly-icon.png";
 
   const meta = $("[data-preview-meta]");
   const previewTitle = $("[data-preview-title]");
@@ -898,7 +898,7 @@ function renderNewsletterCards() {
       (item) => `
         <a class="newsletter-card" href="${escapeHtml(item.href || "#")}" data-issue-key="${escapeHtml(item.detailKey || "")}" data-stagger-item target="_blank" rel="noreferrer">
           <span class="newsletter-card-thumb">
-            <img src="${escapeHtml(item.image || "/assets/newming-weekly-icon.png")}" alt="" loading="lazy" />
+            <img src="${escapeHtml(item.image || "assets/newming-weekly-icon.png")}" alt="" loading="lazy" />
           </span>
           <span class="newsletter-card-body">
             <h3>${escapeHtml(item.title?.[currentLanguage] || item.title?.ko || translate("brand"))}</h3>
@@ -1047,7 +1047,7 @@ async function tryLoadRss(category = currentRssCategory) {
         const title = item.querySelector("title")?.textContent || translate("rssFallback");
         const link = item.querySelector("link")?.textContent || source.url;
         const description = item.querySelector("description")?.textContent || "";
-        const image = item.querySelector("enclosure")?.getAttribute("url") || "/assets/newming-weekly-icon.png";
+        const image = item.querySelector("enclosure")?.getAttribute("url") || "assets/newming-weekly-icon.png";
         const cleanDescription = description.replace(/<[^>]*>/g, "").slice(0, 48);
         return `
           <a class="rss-item" href="${escapeHtml(link)}" data-stagger-item target="_blank" rel="noreferrer">
