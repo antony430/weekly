@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>뉴밍 위클리 | Newming Weekly</title>
+    <meta
+      name="description"
+      content="흩어진 주요 이슈를 AI가 묶고, 꼭 필요한 맥락만 골라 이메일로 전하는 뉴밍 위클리입니다."
+    />
+    <meta property="og:title" content="뉴밍 위클리" />
+    <meta
+      property="og:description"
+      content="뉴스의 흐름을 한 번에 읽는 뉴밍 위클리."
+    />
+    <meta property="og:image" content="assets/newming-weekly-og.png" />
+    <link rel="icon" href="assets/newmingweekly.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css?v=20260612-1139" />
+    <link rel="stylesheet" href="header.css?v=20260611-1545" />
+    <link rel="stylesheet" href="footer.css?v=20260611-1545" />
+    <script defer src="https://cdn.jsdelivr.net/npm/@adrop/ads-web-sdk@latest/dist/adrop-ads.min.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="#" aria-label="Newming Weekly home">
+          <img class="brand-logo" src="assets/newming_logo.svg" alt="" />
+          <span data-i18n="brand">뉴밍 위클리</span>
+        </a>
+
+        <div class="header-actions">
+          <div class="language-switch" role="group" aria-label="Language">
+            <button type="button" data-lang-option="ko" aria-pressed="true">KR</button>
+            <button type="button" data-lang-option="en" aria-pressed="false">EN</button>
+          </div>
+          <button class="button button-primary header-subscribe" type="button" data-open-modal data-i18n="subscribeShort">
+            무료 구독
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            data-copy-link
+            data-i18n-aria-label="shareCta"
+            data-i18n-title="shareCta"
+            aria-label="공유하기"
+            title="공유하기"
+          >
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .2 1.06L8.9 8.68A3 3 0 0 0 6 8a3 3 0 1 0 2.9 3.75l6.34 3.66A3 3 0 0 0 15 16a3 3 0 1 0 1.1-2.3L9.76 10a3.05 3.05 0 0 0 0-.68l6.3-3.62A3 3 0 0 0 18 8Z" />
+            </svg>
+            <span class="sr-only" data-i18n="shareCta">공유하기</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="delivery-hero visual-hero" aria-labelledby="hero-title" data-reveal>
+        <div class="visual-hero-surface" aria-hidden="true">
+          <div class="visual-hero-glow visual-hero-glow-top"></div>
+        </div>
+        <div class="container delivery-hero-grid">
+          <div class="delivery-board">
+            <p class="eyebrow" data-i18n="deliveryEyebrow" data-stagger-item>Newming Weekly</p>
+            
+            <h1 id="hero-title" data-i18n="deliveryTitle" data-hero-title data-parallax data-parallax-speed="-0.018">한 주의 핵심 뉴스,||메일 한 통으로.</h1>
+            <p class="hero-copy" data-i18n="deliveryCopy" data-stagger-item>
+              뉴밍 위클리는 흩어진 주요 이슈를 AI가 묶고, 읽기 좋은 순서로 정리해 메일함으로 보내드립니다.
+            </p>
+
+            <form class="subscribe-form hero-form" data-subscribe-form data-stagger-item>
+              <label class="sr-only" for="hero-email" data-i18n="emailLabel">이메일 주소</label>
+              <input
+                id="hero-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                placeholder="email@example.com"
+                required
+              />
+              <button class="button button-primary" type="submit" data-i18n="subscribeCta">
+                구독하기
+              </button>
+            </form>
+            <p class="form-message" role="status" data-form-message data-stagger-item></p>
+            <p class="hero-note" data-i18n="privacyNote" data-stagger-item>
+              구독 해지는 언제든 가능합니다. 뉴스레터 발송 외 목적으로 사용하지 않습니다.
+            </p>
+
+            <div class="delivery-meta" data-stagger-item>
+              <span data-i18n="statOne">주요 이슈 5개</span>
+              <span data-i18n="formatFrequency">매주 1회</span>
+              <span data-i18n="statThree">무료 구독</span>
+            </div>
+          </div>
+
+          <div class="mockup-stage" aria-label="Newsletter product preview" data-stagger-item>
+            <div class="hero-mini-card hero-mini-card-left parallax-layer" data-parallax data-parallax-speed="0.06" data-stagger-item aria-hidden="true">
+              <span data-i18n="heroLayerLeftLabel">클러스터링 뉴스</span>
+              <strong data-i18n="heroLayerLeftTitle">8개 주요 언론사 기사</strong>
+              <em data-i18n="heroLayerLeftCopy">같은 흐름을 묶어 읽기 쉽게 정리합니다.</em>
+            </div>
+            <div class="phone-preview parallax-layer" data-parallax data-parallax-speed="0.085" aria-label="Mobile newsletter preview">
+              <img class="phone-mockup-image" src="assets/steppers.svg?v=20260610-1907" alt="" />
+              <div class="phone-live-content" aria-hidden="true">
+                <span data-phone-meta>2026.06.05 · 뉴밍 위클리</span>
+                <strong data-phone-title>[뉴밍 위클리] 선관위원장 사퇴·코스피 급락</strong>
+                <p data-phone-copy>투표용지 부족 사태, 코스피 급락, 한화 폭발 사고, 젠슨 황 방한, 청년 빚 문제를 정리했습니다.</p>
+                <img data-phone-image src="https://cdn.newming.io/news/fn/202606051634078460_l.webp" alt="" />
+                <div class="phone-content-skeleton">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-mini-card hero-mini-card-right parallax-layer" data-parallax data-parallax-speed="-0.035" data-stagger-item aria-hidden="true">
+              <span data-i18n="heroLayerRightLabel">구독자 수</span>
+              <strong data-i18n="heroLayerRightTitle" data-count-up="13920" data-count-suffix-ko="명" data-count-suffix-en="">13,920명</strong>
+              <em data-i18n="heroLayerRightCopy">6월 기준</em>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-band features-section section-reveal" aria-labelledby="value-title" data-reveal>
+        <div class="container">
+          <p class="eyebrow" data-i18n="valueEyebrow" data-stagger-item>왜 뉴밍 위클리인가요</p>
+          <h2 id="value-title" class="section-title" data-i18n="valueTitle" data-animated-title>
+            복잡한 뉴스 흐름을||읽기 쉬운 맥락으로
+          </h2>
+          <p class="section-copy" data-i18n="valueCopy" data-stagger-item>흩어진 기사와 이슈를 뉴스레터 안에서 바로 읽히는 카드형 흐름으로 정리합니다.</p>
+          <div class="value-grid features-grid">
+            <article class="value-card feature-card feature-card-context" data-stagger-item>
+              <div class="feature-visual" aria-hidden="true">
+                <div class="feature-news-stack">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <div class="feature-card-copy">
+                <h3 data-i18n="valueOneTitle">쉽고 정확한 맥락</h3>
+                <p data-i18n="valueOneCopy">길고 복잡한 이슈를 이해하기 쉬운 문장과 구조로 정리합니다.</p>
+              </div>
+            </article>
+            <article class="value-card feature-card feature-card-mobile" data-stagger-item>
+              <div class="feature-visual" aria-hidden="true">
+                <img src="assets/steppers.svg?v=20260610-1907" alt="" />
+                <div class="feature-floating-chip">
+                  <b>5</b>
+                  <span>key issues</span>
+                </div>
+              </div>
+              <div class="feature-card-copy">
+                <h3 data-i18n="valueTwoTitle">핵심만 모아서</h3>
+                <p data-i18n="valueTwoCopy">여러 매체에 흩어진 흐름을 한눈에 볼 수 있도록 묶어 보여줍니다.</p>
+              </div>
+            </article>
+            <article class="value-card feature-card feature-card-flow" data-stagger-item>
+              <div class="feature-visual" aria-hidden="true">
+                <div class="feature-flow-map">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <i></i>
+                </div>
+              </div>
+              <div class="feature-card-copy">
+                <h3 data-i18n="valueThreeTitle">놓치기 전에 빠르게</h3>
+                <p data-i18n="valueThreeCopy">한 주의 중요한 변화를 메일함에서 바로 확인할 수 있습니다.</p>
+              </div>
+            </article>
+            <article class="value-card feature-card feature-card-inbox" data-stagger-item>
+              <div class="feature-visual" aria-hidden="true">
+                <div class="feature-inbox-card">
+                  <span>Newming Weekly</span>
+                  <strong>Briefing</strong>
+                  <em></em>
+                  <em></em>
+                </div>
+              </div>
+              <div class="feature-card-copy">
+                <h3 data-i18n="valueFourTitle">메일함에서 바로 읽기</h3>
+                <p data-i18n="valueFourCopy">별도 앱 설정 없이 한 주간의 주요 이슈만 정리한 내용을 받아봅니다.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="container content-layout" id="letters">
+        <div class="content-feed content-reveal" data-reveal>
+          <section class="newsletter-panel feed-section">
+            <div class="section-heading row-heading">
+              <p class="eyebrow" data-i18n="latestEyebrow" data-stagger-item>뉴스레터 리스트</p>
+              <h2 data-i18n="latestTitle" data-stagger-item>최근 도착한 브리핑</h2>
+            </div>
+
+            <div class="newsletter-list" data-newsletter-list></div>
+
+          </section>
+
+          <section class="newsletter-card-section" aria-labelledby="newsletter-card-title">
+            <h2 id="newsletter-card-title" class="sr-only" data-i18n="newsletterCardTitle">지난 뉴스레터</h2>
+            <div class="newsletter-card-grid" data-newsletter-card-list></div>
+            <!--<div class="list-footer" data-newsletter-card-footer>
+              <button class="button button-ghost" type="button" data-newsletter-more data-i18n="viewMore">
+                전체보기
+              </button>
+            </div>-->
+          </section>
+
+          <section class="feed-section briefing-flow" id="insight" aria-labelledby="guide-title">
+            <div class="briefing-flow-copy">
+              <h2 id="guide-title" data-i18n="guideTitle" data-stagger-item>한 주의 뉴스를 메일 안에서 바로 읽히는 순서로 정리합니다.</h2>
+              <p data-i18n="sampleCopy" data-stagger-item>
+                핵심 이슈, 맥락, 연결 기사, 더 읽을 뉴스가 하나의 흐름으로 이어지도록 구성합니다.
+              </p>
+            </div>
+            <div class="briefing-flow-list">
+              <article class="briefing-flow-item" data-stagger-item>
+                <span>1</span>
+                <div>
+                  <h3 data-i18n="formatOneTitle">핵심 이슈</h3>
+                  <p data-i18n="formatOneCopy">이번 주에 먼저 알아야 할 큰 흐름을 한 문단으로 시작합니다.</p>
+                </div>
+              </article>
+              <article class="briefing-flow-item" data-stagger-item>
+                <span>2</span>
+                <div>
+                  <h3 data-i18n="formatTwoTitle">맥락 정리</h3>
+                  <p data-i18n="formatTwoCopy">왜 지금 중요한지, 배경과 연결된 흐름을 짧게 붙입니다.</p>
+                </div>
+              </article>
+              <article class="briefing-flow-item" data-stagger-item>
+                <span>3</span>
+                <div>
+                  <h3 data-i18n="insightOneTitle">이슈 묶음</h3>
+                  <p data-i18n="insightOneCopy">같은 사건을 다룬 여러 기사를 하나로 묶어 중복 없이 보여줍니다.</p>
+                </div>
+              </article>
+              <article class="briefing-flow-item" data-stagger-item>
+                <span>4</span>
+                <div>
+                  <h3 data-i18n="briefingMoreTitle">더 읽을 뉴스</h3>
+                  <p data-i18n="briefingMoreCopy">함께 보면 좋은 후속 이슈를 짧게 이어 붙여 한 주의 감을 잡게 합니다.</p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side-rail right-rail content-reveal side-rail-reveal" aria-label="Newming side content" data-reveal>
+          <div class="side-rail-scroll right-rail__scroll">
+            <section class="rail-block subscribe-card right-rail__block right-rail__subscribe" data-stagger-item>
+              <p class="eyebrow" data-i18n="railSubscribeEyebrow">무료 뉴스레터</p>
+              <h2 data-i18n="railSubscribeTitle">뉴밍 위클리를 받아보세요</h2>
+              <form class="subscribe-form stacked" data-subscribe-form>
+                <label class="sr-only" for="rail-email" data-i18n="emailLabel">이메일 주소</label>
+                <input
+                  id="rail-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="email@example.com"
+                  required
+                />
+                <button class="button button-primary" type="submit" data-i18n="subscribeShort">
+                  무료 구독
+                </button>
+              </form>
+            </section>
+
+            <section class="rail-block news-feed right-rail__block right-rail__newsfeed" data-stagger-item>
+              <div class="rss-header">
+                <div class="rss-tabs" role="tablist" aria-label="뉴스 카테고리">
+                  <button
+                    class="rss-tab"
+                    type="button"
+                    data-rss-tab="sports"
+                    aria-selected="true"
+                    data-i18n="rssSports"
+                  >
+                    스포츠
+                  </button>
+                  <button
+                    class="rss-tab"
+                    type="button"
+                    data-rss-tab="entertainment"
+                    aria-selected="false"
+                    data-i18n="rssEntertainment"
+                  >
+                    연예
+                  </button>
+                </div>
+              </div>
+              <div class="rss-list" data-rss-list></div>
+            </section>
+
+            <section class="rail-block ad-block right-rail__block right-rail__ad" data-stagger-item>
+              <div
+                class="ad-banner"
+                data-adrop-unit="01KTQVP236P1172NYFMGYQTQAT"
+                data-adrop-theme="dark"
+              >
+                <span class="ad-kicker">ADROP</span>
+                <strong>Espresso Two Shot</strong>
+                <span data-i18n="adCopy">잠시, 맥락 있는 뉴스 한 잔 어때요?</span>
+                <em data-i18n="adCta">지금 만나보기</em>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </section>
+
+      <section class="bottom-cta section-reveal" aria-labelledby="bottom-title" data-reveal>
+        <div class="container bottom-cta-inner">
+          <div class="bottom-copy" data-stagger-item>
+            <h2 id="bottom-title">
+              <span data-i18n="bottomHeadlineOne">복잡한 뉴스는 덜어내고,</span>
+              <span data-i18n="bottomHeadlineTwo">한 주의 핵심만 남깁니다. 읽기 쉬운</span>
+              <span data-i18n="bottomHeadlineThree">브리핑으로 메일함에 보내드려요.</span>
+            </h2>
+          </div>
+          <div class="bottom-form-panel" data-stagger-item>
+            <form class="bottom-signup-form" data-subscribe-form>
+              <label for="bottom-email" data-i18n="bottomEmailPrompt">이메일을 입력해 주세요.</label>
+              <input
+                id="bottom-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                placeholder="email@example.com"
+                required
+              />
+              <div class="consent-row">
+                <label>
+                  <input type="checkbox" name="privacyConsent" required />
+                  <span data-i18n="consentPrivacy">개인정보 수집 이용 약관 동의 (필수)</span>
+                </label>
+                <label>
+                  <input type="checkbox" name="marketingConsent" required />
+                  <span data-i18n="consentMarketing">광고성 정보수신 동의 (필수)</span>
+                </label>
+              </div>
+              <button class="bottom-submit" type="submit" data-i18n="bottomSubmit">
+                뉴밍 위클리 구독하기
+              </button>
+            </form>
+            <p class="form-message" role="status" data-form-message></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="trust-marquee" aria-labelledby="trust-title">
+        <div class="container trust-marquee-inner">
+          <p class="sr-only" id="trust-title">뉴밍 위클리 신뢰 매체</p>
+          <div class="trust-marquee-viewport" aria-hidden="true">
+            <div class="trust-marquee-track">
+              <div class="trust-marquee-group">
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/maeil.svg" alt="매일경제" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/fnnews.svg" alt="파이낸셜뉴스" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/joongang.svg" alt="중앙일보" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hankyung.svg" alt="한국경제" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hani.svg" alt="한겨레" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hankook.svg" alt="한국일보" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/kyunghyang.svg" alt="경향신문" />
+                </span>
+                <span class="trust-marquee-item trust-marquee-item-sportschosun">
+                  <img src="https://griplabs.io/assets/press-logos/sportschosun.svg" alt="스포츠조선" />
+                </span>
+              </div>
+              <div class="trust-marquee-group" aria-hidden="true">
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/maeil.svg" alt="매일경제" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/fnnews.svg" alt="파이낸셜뉴스" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/joongang.svg" alt="중앙일보" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hankyung.svg" alt="한국경제" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hani.svg" alt="한겨레" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/hankook.svg" alt="한국일보" />
+                </span>
+                <span class="trust-marquee-item">
+                  <img src="https://griplabs.io/assets/press-logos/kyunghyang.svg" alt="경향신문" />
+                </span>
+                <span class="trust-marquee-item trust-marquee-item-sportschosun">
+                  <img src="https://griplabs.io/assets/press-logos/sportschosun.svg" alt="스포츠조선" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-top">
+          <strong data-i18n="footerCompanyName">주식회사 그립랩스</strong>
+          <nav class="footer-socials" aria-label="Social channels">
+            <a
+              class="social-link"
+              href="https://www.linkedin.com/company/griplabs-inc/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Grip Labs LinkedIn"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.94 8.99H3.62v10.62h3.32V8.99ZM5.28 4.02a1.93 1.93 0 1 0 0 3.86 1.93 1.93 0 0 0 0-3.86Zm13.84 9.62c0-3.19-1.7-4.67-3.97-4.67a3.43 3.43 0 0 0-3.09 1.7h-.05V8.99H8.82v10.62h3.32v-5.25c0-1.39.26-2.73 1.98-2.73 1.69 0 1.71 1.58 1.71 2.82v5.16h3.29v-5.97Z" />
+              </svg>
+            </a>
+            <a
+              class="social-link"
+              href="https://www.instagram.com/newming.new/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Newming Instagram"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7.75 2.8h8.5a4.96 4.96 0 0 1 4.95 4.95v8.5a4.96 4.96 0 0 1-4.95 4.95h-8.5a4.96 4.96 0 0 1-4.95-4.95v-8.5A4.96 4.96 0 0 1 7.75 2.8Zm8.5 16.62a3.18 3.18 0 0 0 3.17-3.17v-8.5a3.18 3.18 0 0 0-3.17-3.17h-8.5a3.18 3.18 0 0 0-3.17 3.17v8.5a3.18 3.18 0 0 0 3.17 3.17h8.5ZM12 7.25a4.75 4.75 0 1 1 0 9.5 4.75 4.75 0 0 1 0-9.5Zm0 7.72a2.97 2.97 0 1 0 0-5.94 2.97 2.97 0 0 0 0 5.94Zm4.96-8.64a1.11 1.11 0 1 1 0 2.22 1.11 1.11 0 0 1 0-2.22Z" />
+              </svg>
+            </a>
+          </nav>
+        </div>
+        <p class="footer-company-info">
+          <span data-i18n="footerCompanyLine1">사업자등록번호 : 348-86-01356 | 대표 : 김석환 인터넷뉴스서비스사업 등록번호 : 서울 자60122</span>
+          <span>
+            <span data-i18n="footerCompanyLine2Prefix">통신판매업 신고번호 : 2022-서울영등포-0291</span>
+            <a
+              href="https://www.ftc.go.kr/bizCommPop.do?wrkr_no=3488601356"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="사업자정보확인"
+              data-i18n="footerBizCheck"
+            >
+              사업자정보확인
+            </a>
+            <span data-i18n="footerCompanyLine2Suffix">서울특별시 영등포구 국회대로70길 23, 7층(여의도동, 용산빌딩) 이메일 : hello@griplabs.io</span>
+          </span>
+        </p>
+        <p data-i18n="footerYouth">청소년 보호정책(책임자 : 윤여진)</p>
+        <nav class="footer-links" aria-label="Footer policies">
+          <a href="https://sites.google.com/newming.co.kr/terms-services?usp=sharing" target="_blank" rel="noreferrer">
+            <span data-i18n="footerTerms">서비스 이용 약관</span>
+          </a>
+          <a href="https://sites.google.com/newming.co.kr/terms-privacy?usp=sharing" target="_blank" rel="noreferrer">
+            <span data-i18n="footerPrivacyLink">개인정보 처리 방침</span>
+          </a>
+          <a href="https://sites.google.com/newming.co.kr/terms-youth?usp=sharing" target="_blank" rel="noreferrer">
+            <span data-i18n="footerYouthLink">청소년 보호 방침</span>
+          </a>
+          <a href="https://sites.google.com/newming.co.kr/terms-principle?usp=sharing" target="_blank" rel="noreferrer">
+            <span data-i18n="footerPrinciple">기사 배열 원칙</span>
+          </a>
+        </nav>
+        <p data-i18n="footerCopyright">Copyright © 2024 Grip Labs Inc. 모든 권리 보유.</p>
+      </div>
+    </footer>
+
+    <div class="modal" data-modal hidden>
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" type="button" aria-label="Close subscription modal" data-close-modal></button>
+        <p class="eyebrow" data-i18n="modalEyebrow">뉴밍 위클리 무료 구독</p>
+        <h2 id="modal-title" data-i18n="modalTitle">최신 뉴스레터를 이메일로 받아보세요</h2>
+        <p data-i18n="modalCopy">
+          전체 뉴스레터 목록과 최신 브리핑을 받아볼 수 있도록 이메일 주소를 남겨주세요.
+        </p>
+        <form class="subscribe-form stacked" data-subscribe-form>
+          <label class="sr-only" for="modal-email" data-i18n="emailLabel">이메일 주소</label>
+          <input
+            id="modal-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="email@example.com"
+            required
+          />
+          <button class="button button-primary" type="submit" data-i18n="subscribeCta">
+            무료로 구독하기
+          </button>
+        </form>
+        <p class="form-message" role="status" data-form-message></p>
+      </section>
+    </div>
+
+    <div class="issue-modal" data-issue-modal hidden>
+      <div class="issue-modal-backdrop" data-close-issue></div>
+      <section class="issue-modal-panel" role="dialog" aria-modal="true" aria-label="Newsletter detail">
+        <button class="issue-modal-close" type="button" aria-label="Close newsletter detail" data-close-issue></button>
+        <div class="issue-browser-shell" aria-hidden="true">
+          <iframe
+            class="issue-frame"
+            title="Newsletter issue"
+            sandbox="allow-popups allow-popups-to-escape-sandbox"
+            data-issue-frame
+          ></iframe>
+          <div class="issue-loading" data-issue-loading>Loading...</div>
+          <img class="issue-browser-svg" src="assets/browser-dark.svg" alt="" aria-hidden="true">
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite" data-toast hidden></div>
+
+    <script src="script.js?v=20260612-1143"></script>
+  </body>
+</html>
