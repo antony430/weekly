@@ -151,7 +151,7 @@ img {
   inset: 0;
   background:
     linear-gradient(90deg, #f8fafd 0%, rgba(248, 250, 253, 0.96) 42%, rgba(248, 250, 253, 0.82) 70%, rgba(248, 250, 253, 0.96) 100%),
-    url("assets/newming-weekly-og.png") right 44% center / 780px auto no-repeat;
+    url("/assets/newming-weekly-og.png") right 44% center / 780px auto no-repeat;
   z-index: -1;
 }
 
@@ -584,7 +584,7 @@ img {
   border-radius: 0;
   background:
     linear-gradient(180deg, rgba(64, 28, 24, 0.38), rgba(64, 28, 24, 0.96)),
-    url("assets/newming-weekly-icon.png") center 36px / 112px no-repeat,
+    url("/assets/newming-weekly-icon.png") center 36px / 112px no-repeat,
     #351d1b;
   color: #ffffff;
 }
@@ -684,7 +684,7 @@ img {
   padding: 32px;
   background:
     linear-gradient(180deg, rgba(20, 23, 31, 0.14), rgba(20, 23, 31, 0.82)),
-    url("assets/newming-weekly-og.png") center / cover no-repeat;
+    url("/assets/newming-weekly-og.png") center / cover no-repeat;
   color: #ffffff;
 }
 
@@ -1222,7 +1222,7 @@ img {
   .hero-background {
     background:
       linear-gradient(180deg, rgba(248, 250, 253, 0.96), rgba(248, 250, 253, 0.86)),
-      url("assets/newming-weekly-og.png") center bottom / 620px auto no-repeat;
+      url("/assets/newming-weekly-og.png") center bottom / 620px auto no-repeat;
   }
 
   .hero-content {
@@ -3005,7 +3005,7 @@ body {
   border-right: 1px solid var(--color-line);
   background:
     linear-gradient(180deg, rgba(17, 19, 23, 0.04), rgba(17, 19, 23, 0.74)),
-    url("assets/newming-weekly-og.png") center / cover no-repeat;
+    url("/assets/newming-weekly-og.png") center / cover no-repeat;
 }
 
 .format-lead span {
