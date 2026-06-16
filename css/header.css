@@ -51,23 +51,6 @@
   flex: 0 0 auto;
 }
 
-.header-subscribe {
-  width: 132px;
-  padding-right: 0;
-  padding-left: 0;
-  border-radius: 999px;
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  box-shadow: none;
-  color: #ffffff;
-}
-
-.header-subscribe:hover {
-  border-color: var(--color-primary-dark);
-  background: var(--color-primary-dark);
-  color: #ffffff;
-}
-
 .icon-button {
   display: inline-grid;
   place-items: center;
@@ -197,10 +180,6 @@
     gap: 8px;
   }
 
-  .header-subscribe {
-    display: none;
-  }
-
   .header-actions .button {
     min-height: 40px;
     font-size: 13px;
@@ -225,7 +204,6 @@
 
 @media (max-width: 420px) {
   .brand {
-    /*max-width: calc(100vw - 236px);*/
     min-width: 0;
     font-size: 16px;
     overflow: hidden;
