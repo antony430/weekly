@@ -7,7 +7,15 @@ const NEWSLETTER_LIST_LIMIT = 1;
 const NEWSLETTER_CARD_LIMIT = 6;
 const RSS_ITEM_LIMIT = 3;
 const LINE_BREAK_DELIMITER = "||";
-const AUTO_RELOAD_FILES = ["index.html", "styles.css", "header.css", "footer.css", "script.js"];
+const AUTO_RELOAD_FILES = [
+  "index.html",
+  "404.html",
+  "css/styles.css",
+  "css/header.css",
+  "css/footer.css",
+  "css/404.css",
+  "js/script.js",
+];
 
 const content = {
   ko: {
