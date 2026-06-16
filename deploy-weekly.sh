@@ -33,7 +33,8 @@ fi
 
 echo "[1/4] 버전: $NEW_TAG (이전: ${LATEST_TAG:-없음})"
 git -C "$LOCAL_DIR" tag "$NEW_TAG"
-git -C "$LOCAL_DIR" push origin "$BRANCH" --tags
+git -C "$LOCAL_DIR" push origin "$BRANCH"
+git -C "$LOCAL_DIR" push origin "$NEW_TAG"
 
 # 3. 원격 디렉터리 준비
 echo "[2/4] 원격 디렉터리 준비..."
