@@ -1,6 +1,8 @@
 const NEWSLETTER_API_BASE_URL = "http://54.116.114.103:8092";
 const NEWSLETTER_API_URL = `${NEWSLETTER_API_BASE_URL}/api/newsletter/issues`;
 const SUBSCRIBE_API_URL = "";
+const RECAPTCHA_SITE_KEY = "6Le6ox8tAAAAAOvxaDKuBwh52KlhacOxpXHjW4RS";
+const RECAPTCHA_ACTION = "subscribe";
 const NEWSLETTER_LIST_LIMIT = 1;
 const NEWSLETTER_CARD_LIMIT = 6;
 const RSS_ITEM_LIMIT = 3;
@@ -134,6 +136,7 @@ const content = {
     bottomEmailPrompt: "이메일을 입력해 주세요.",
     consentPrivacy: "개인정보 수집 이용 약관 동의 (필수)",
     consentMarketing: "광고성 정보수신 동의 (필수)",
+    consentLabel: "개인정보 수집 및 뉴스레터 수신 동의",
     bottomSubmit: "뉴밍 위클리 구독하기",
     footerBrand: "Newming Weekly",
     footerCopy: "주식회사 그립랩스가 제공하는 뉴스 브리핑 뉴스레터입니다.",
@@ -156,6 +159,7 @@ const content = {
     modalEyebrow: "뉴밍 위클리 무료 구독",
     modalTitle: "최신 뉴스레터를 이메일로 받아보세요",
     modalCopy: "개인 설정 없이, 뉴밍 위클리의 고정 브리핑 포맷을 이메일로 받아보세요.",
+    consentLabel: "개인정보 수집 및 뉴스레터 수신 동의",
     success: "구독 신청이 접수되었습니다.",
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
     copied: "링크가 복사되었습니다.",
@@ -289,6 +293,7 @@ const content = {
     bottomEmailPrompt: "Enter your email.",
     consentPrivacy: "Agree to privacy terms (required)",
     consentMarketing: "Agree to receive promotional emails (required)",
+    consentLabel: "I agree to the collection of personal information and receiving the newsletter",
     bottomSubmit: "Subscribe to Newming Weekly",
     footerBrand: "Newming Weekly",
     footerCopy: "A news briefing newsletter provided by Grip Labs Inc.",
@@ -311,6 +316,7 @@ const content = {
     modalEyebrow: "Subscribe to Newming Weekly",
     modalTitle: "Get the latest issues by email",
     modalCopy: "Leave your email to receive Newming Weekly's fixed briefing format.",
+    consentLabel: "I agree to the collection of personal information and receiving the newsletter",
     success: "Your subscription request has been received.",
     invalidEmail: "Please enter a valid email address.",
     copied: "Link copied.",
@@ -322,10 +328,14 @@ const content = {
 
 const LEGACY_NEWSLETTER_DATA_URL = "assets/legacy-newsletters.json";
 const DAILY_NEWSLETTER_CACHE_KEY = "newming-weekly-daily-latest";
+const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
 
 let legacyNewsletters = [];
 let dailyNewsletter = null;
 let newsletters = [];
+let newsletterFeatured = null;
+let recaptchaLoaderPromise = null;
+let pendingSubscriptionEmail = "";
 
 const rssSources = {
   sports: {
@@ -486,19 +496,60 @@ function escapeHtml(value) {
 function stripNewsletterFooter(html) {
   if (!html) return html;
 
-  const footerPatterns = [
-    /<tr>\s*<td class="newming-section newming-footer"[\s\S]*?<\/td>\s*<\/tr>\s*<tr>\s*<td class="newming-bottom-space"[\s\S]*?<\/td>\s*<\/tr>/gi,
-    /<footer[\s\S]*?<\/footer>/gi,
-    /<div style="font-size:16px;line-height:26px;word-break:break-word;overflow-wrap:\s*break-word;margin:8px 0px 8px 0px;;\s*padding:9px 0px;">\s*<table align="center" border="0" cellpadding="0" cellspacing="0" data-block-id="0Hy5-bRhBS"[\s\S]*?<\/table>\s*<\/div>/gi,
-    /<table border="0" cellpadding="0" cellspacing="0" width="100%">\s*<tbody>\s*<tr>\s*<td align="left" style="font-size:0px;padding:8px 0px 8px 0px;word-break:break-word">\s*<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: block; color: #1a1a1a; font-size: 24px; font-weight: 600; line-height: 1\.3; margin: 16px 0px 4px 0px;;font-size:17px;line-height:29px;text-align:center;color:#030212">\s*뉴밍 위클리 주변에 소개하기 📣\s*<\/div>\s*<\/td>\s*<\/tr>\s*<tr>\s*<td align="left" style="font-size:0px;padding:8px 0px 8px 0px;word-break:break-word">[\s\S]*?<\/tr>\s*<\/tbody>\s*<\/table>/gi,
-    /<tr>\s*<td>\s*<div style="font-size:16px;line-height:26px">\s*<hr style="background:#e5e7eb;border:none;height:1px;margin:24px 0px;padding:0px"\/>\s*<\/div>\s*<table border="0" cellpadding="0" cellspacing="0" width="100%">\s*<tbody>\s*<tr>\s*<td align="left" style="font-size:0px;padding:8px 0px 8px 0px;word-break:break-word">\s*<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';display: block; color: #1a1a1a; font-size: 24px; font-weight: 600; line-height: 1\.3; margin: 16px 0px 4px 0px;;font-size:17px;line-height:29px;text-align:left;">\s*이전 뉴스레터 📃\s*<\/div>\s*<\/td>\s*<\/tr>\s*<\/tbody>\s*<\/table>[\s\S]*?<\/td>\s*<\/tr>/gi,
-    /<table border="0" cellpadding="0" cellspacing="0" style="margin: 0 0 20px 0; width: 100%;"><tbody><tr>[\s\S]*?<\/table>/gi,
-    /<table style="margin: 0px 0px 20px 0px;">[\s\S]*?<\/table>/gi,
-    /<trackable>[\s\S]*?<\/trackable>/gi,
-    /<img alt="" height="1" src="https:\/\/www\.google-analytics\.com\/g\/collect[\s\S]*?\/>/gi,
+  const webLinkIndex = html.indexOf("웹에서 보기");
+  if (webLinkIndex !== -1) {
+    const webRowStart = html.lastIndexOf("<tr>", webLinkIndex);
+    const webRowEnd = html.indexOf("</tr>", webLinkIndex);
+    if (webRowStart !== -1 && webRowEnd !== -1) {
+      html = `${html.slice(0, webRowStart)}${html.slice(webRowEnd + 5)}`;
+    }
+  }
+
+  const footerStartMarkers = [
+    "뉴밍 위클리 주변에 소개하기 📣",
+    "이전 뉴스레터 📃",
+    "한 주간의 주요 뉴스를 통해 세상의 흐름을 한눈에 파악해 보세요",
+    "서울특별시 영등포구 국회대로72길 4, 3층 (여의도동, 아이비피아빌딩)",
+    "사업자등록번호 : 348-86-01356",
+    "Copyright ©",
   ];
 
-  return footerPatterns.reduce((value, pattern) => value.replace(pattern, ""), html);
+  let footerStart = -1;
+  for (const marker of footerStartMarkers) {
+    const index = html.lastIndexOf(marker);
+    if (index !== -1 && (footerStart === -1 || index < footerStart)) footerStart = index;
+  }
+
+  if (footerStart === -1) {
+    return html;
+  }
+
+  const rowStart = html.lastIndexOf("<tr>", footerStart);
+  const cutIndex = rowStart !== -1 ? rowStart : footerStart;
+  return html.slice(0, cutIndex);
+}
+
+function injectIssueViewportStyles(html) {
+  const viewportStyles = `
+<style>
+  @media (max-width: 840px) {
+    body {
+      font-size: 15px !important;
+      line-height: 1.55 !important;
+    }
+    h1 { font-size: 28px !important; line-height: 1.18 !important; }
+    h2 { font-size: 24px !important; line-height: 1.22 !important; }
+    h3 { font-size: 20px !important; line-height: 1.24 !important; }
+    h4 { font-size: 18px !important; line-height: 1.28 !important; }
+    h5 { font-size: 16px !important; line-height: 1.28 !important; }
+    h6 { font-size: 14px !important; line-height: 1.28 !important; }
+  }
+</style>`;
+
+  if (!html) return html;
+  if (html.includes("</head>")) return html.replace("</head>", `${viewportStyles}</head>`);
+  if (html.includes("<body")) return html.replace("<body", `${viewportStyles}<body`);
+  return `${viewportStyles}${html}`;
 }
 
 function translate(key, params = {}) {
@@ -728,14 +779,22 @@ function normalizeNewsletterIssue(issue) {
 function setNewsletterCollections(dailyIssue, legacyIssues) {
   dailyNewsletter = dailyIssue || null;
   legacyNewsletters = Array.isArray(legacyIssues) ? [...legacyIssues] : [];
+  newsletterFeatured = dailyNewsletter;
   newsletters = dailyNewsletter ? [dailyNewsletter, ...legacyNewsletters] : [...legacyNewsletters];
   newsletters = newsletters
     .slice()
     .sort((left, right) => new Date(right.sentAt || right.issueDate || 0) - new Date(left.sentAt || left.issueDate || 0));
+  if (dailyNewsletter) {
+    newsletters = [dailyNewsletter, ...newsletters.filter((item) => item !== dailyNewsletter)];
+  }
   newsletterTotal = newsletters.length;
   newsletterArchives = newsletters.slice(NEWSLETTER_LIST_LIMIT, NEWSLETTER_LIST_LIMIT + NEWSLETTER_CARD_LIMIT);
   newsletterArchiveOffset = NEWSLETTER_LIST_LIMIT + newsletterArchives.length;
   newsletterArchiveHasMore = false;
+}
+
+function getLegacyNewsletterItems(limit = NEWSLETTER_CARD_LIMIT) {
+  return legacyNewsletters.slice(0, limit);
 }
 
 function applyLanguage(language) {
@@ -949,17 +1008,41 @@ async function loadNewsletters() {
   renderNewsletterMoreButton();
 
   try {
-    const [legacyResult, dailyResult] = await Promise.allSettled([
+    const [apiResult, legacyResult] = await Promise.allSettled([
+      fetchNewsletterIssues(NEWSLETTER_LIST_LIMIT + NEWSLETTER_CARD_LIMIT, 0),
       fetchLegacyNewsletterIssues(),
-      fetchDailyNewsletterIssue(),
     ]);
 
-    const legacyItems = legacyResult.status === "fulfilled" ? legacyResult.value : [];
-    const dailyItem = dailyResult.status === "fulfilled" ? dailyResult.value : null;
-    setNewsletterCollections(dailyItem, legacyItems);
+    const apiItems =
+      apiResult.status === "fulfilled" && Array.isArray(apiResult.value.items)
+        ? apiResult.value.items.map(normalizeNewsletterIssue)
+        : [];
+    const legacyItems =
+      legacyResult.status === "fulfilled" && Array.isArray(legacyResult.value)
+        ? legacyResult.value
+        : [];
+
+    if (apiItems.length) {
+      const apiFeatured = apiItems[0] || null;
+      const apiArchives = apiItems.slice(1, NEWSLETTER_CARD_LIMIT + 1);
+      const fallbackArchives = legacyItems.length ? legacyItems : legacyNewsletters;
+      const archiveItems = apiArchives.length
+        ? [...apiArchives, ...fallbackArchives.slice(0, Math.max(0, NEWSLETTER_CARD_LIMIT - apiArchives.length))]
+        : fallbackArchives.slice(0, NEWSLETTER_CARD_LIMIT);
+      setNewsletterCollections(apiFeatured, archiveItems);
+      return;
+    }
+
+    setNewsletterCollections(null, legacyItems.length ? legacyItems : legacyNewsletters);
   } catch (error) {
     console.warn("Using local newsletter fallback.", error);
-    setNewsletterCollections(null, legacyNewsletters);
+    try {
+      const legacyItems = await fetchLegacyNewsletterIssues();
+      setNewsletterCollections(null, legacyItems);
+    } catch (legacyError) {
+      console.warn("Using empty newsletter fallback.", legacyError);
+      setNewsletterCollections(null, []);
+    }
   } finally {
     newslettersLoading = false;
     renderNewsletters();
@@ -975,6 +1058,38 @@ async function loadMoreNewsletterArchives() {
 
 function getRssSource(category = currentRssCategory) {
   return rssSources[category] || rssSources.sports;
+}
+
+function getRssCacheKey(category = currentRssCategory) {
+  return `${RSS_CACHE_KEY_PREFIX}:${category}`;
+}
+
+function readRssCache(category = currentRssCategory) {
+  try {
+    const raw = localStorage.getItem(getRssCacheKey(category));
+    if (!raw) return null;
+
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    if (!Array.isArray(data.items) || typeof data.savedAt !== "number") return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function writeRssCache(category, items) {
+  try {
+    localStorage.setItem(
+      getRssCacheKey(category),
+      JSON.stringify({
+        savedAt: Date.now(),
+        items,
+      }),
+    );
+  } catch {
+    // Ignore storage errors.
+  }
 }
 
 function setActiveRssTab() {
@@ -1018,6 +1133,28 @@ function renderRssFallback(category = currentRssCategory) {
   revealStaggerItems(list);
 }
 
+function renderCachedRss(category = currentRssCategory, items = []) {
+  const list = $("[data-rss-list]");
+  if (!list) return;
+
+  const source = getRssSource(category);
+  const itemsHtml = items
+    .slice(0, RSS_ITEM_LIMIT)
+    .map((item) => `
+      <a class="rss-item" href="${escapeHtml(item.link || source.url)}" data-stagger-item target="_blank" rel="noreferrer">
+        <img class="rss-thumb" src="${escapeHtml(item.image || "assets/newming-weekly-icon.png")}" alt="" loading="lazy" />
+        <span>
+          <strong>${escapeHtml(item.title || translate("rssFallback"))}</strong>
+          <span>${escapeHtml(item.description || "")}</span>
+        </span>
+      </a>
+    `)
+    .join("");
+
+  list.innerHTML = itemsHtml + renderRssMoreLink(source);
+  revealStaggerItems(list);
+}
+
 async function tryLoadRss(category = currentRssCategory) {
   currentRssCategory = category;
   setActiveRssTab();
@@ -1027,7 +1164,7 @@ async function tryLoadRss(category = currentRssCategory) {
   if (!source.url) return;
 
   try {
-    const response = await fetch(source.url);
+    const response = await fetch(`${source.url}?t=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("RSS request failed");
     const text = await response.text();
     const doc = new DOMParser().parseFromString(text, "text/xml");
@@ -1041,31 +1178,32 @@ async function tryLoadRss(category = currentRssCategory) {
     if (!items.length) return;
     if (currentRssCategory !== category) return;
 
-    const list = $("[data-rss-list]");
-    const itemsHtml = items
-      .map((item) => {
-        const title = item.querySelector("title")?.textContent || translate("rssFallback");
-        const link = item.querySelector("link")?.textContent || source.url;
-        const description = item.querySelector("description")?.textContent || "";
-        const image = item.querySelector("enclosure")?.getAttribute("url") || "assets/newming-weekly-icon.png";
-        const cleanDescription = description.replace(/<[^>]*>/g, "").slice(0, 48);
-        return `
-          <a class="rss-item" href="${escapeHtml(link)}" data-stagger-item target="_blank" rel="noreferrer">
-            <img class="rss-thumb" src="${escapeHtml(image)}" alt="" loading="lazy" />
-            <span>
-              <strong>${escapeHtml(title)}</strong>
-              <span>${escapeHtml(cleanDescription)}</span>
-            </span>
-          </a>
-        `;
-      })
-      .join("");
-
-    list.innerHTML = itemsHtml + renderRssMoreLink(source);
-    revealStaggerItems(list);
+    const normalizedItems = items.map((item) => ({
+      title: item.querySelector("title")?.textContent || translate("rssFallback"),
+      link: item.querySelector("link")?.textContent || source.url,
+      description: (item.querySelector("description")?.textContent || "").replace(/<[^>]*>/g, "").slice(0, 48),
+      image: item.querySelector("enclosure")?.getAttribute("url") || "assets/newming-weekly-icon.png",
+    }));
+    writeRssCache(category, normalizedItems);
+    renderCachedRss(category, normalizedItems);
   } catch (error) {
     console.info("Using local RSS fallback.", error);
+    const cached = readRssCache(category);
+    if (cached?.items?.length) {
+      renderCachedRss(category, cached.items);
+    }
   }
+}
+
+function bindRssAutoRefresh() {
+  const refresh = () => {
+    tryLoadRss(currentRssCategory);
+  };
+
+  window.setInterval(refresh, 60 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refresh();
+  });
 }
 
 function setFormMessage(form, message, isError = false) {
@@ -1102,7 +1240,7 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function subscribe(email) {
+async function subscribe(email, recaptchaToken = "", consent = false) {
   if (!SUBSCRIBE_API_URL) {
     return { ok: true };
   }
@@ -1110,34 +1248,109 @@ async function subscribe(email) {
   const response = await fetch(SUBSCRIBE_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, language: currentLanguage }),
+    body: JSON.stringify({
+      email,
+      language: currentLanguage,
+      recaptchaAction: RECAPTCHA_ACTION,
+      recaptchaToken,
+      consent,
+    }),
   });
 
   return { ok: response.ok };
 }
 
+function loadRecaptcha() {
+  if (window.grecaptcha?.execute) {
+    return Promise.resolve(window.grecaptcha);
+  }
+
+  if (!recaptchaLoaderPromise) {
+    recaptchaLoaderPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-recaptcha-loader="true"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.grecaptcha));
+        existing.addEventListener("error", reject);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(RECAPTCHA_SITE_KEY)}`;
+      script.async = true;
+      script.defer = true;
+      script.dataset.recaptchaLoader = "true";
+      script.onload = () => resolve(window.grecaptcha);
+      script.onerror = () => reject(new Error("reCAPTCHA failed to load"));
+      document.head.appendChild(script);
+    });
+  }
+
+  return recaptchaLoaderPromise;
+}
+
+async function getRecaptchaToken() {
+  const grecaptcha = await loadRecaptcha();
+
+  if (!grecaptcha?.ready || !grecaptcha.execute) {
+    throw new Error("reCAPTCHA is unavailable");
+  }
+
+  await new Promise((resolve) => grecaptcha.ready(resolve));
+  return grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION });
+}
+
 function bindForms() {
   $$("[data-subscribe-form]").forEach((form) => {
+    if (form.closest(".modal-panel")) {
+      return;
+    }
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const email = String(formData.get("email") || "").trim();
+
+      if (form.classList.contains("bottom-signup-form")) {
+        const privacyConsent = formData.get("privacyConsent") === "on";
+        const marketingConsent = formData.get("marketingConsent") === "on";
+
+        if (!isValidEmail(email)) {
+          setFormMessage(form, translate("invalidEmail"), true);
+          return;
+        }
+
+        if (!privacyConsent || !marketingConsent) {
+          setFormMessage(form, translate("consentLabel"), true);
+          return;
+        }
+
+        let recaptchaToken = "";
+        try {
+          recaptchaToken = await getRecaptchaToken();
+        } catch (error) {
+          setFormMessage(form, translate("invalidEmail"), true);
+          return;
+        }
+
+        const result = await subscribe(email, recaptchaToken, true);
+        if (result.ok) {
+          setFormMessage(form, "");
+          showToast(translate("success"));
+          form.reset();
+          return;
+        }
+
+        setFormMessage(form, translate("invalidEmail"), true);
+        return;
+      }
 
       if (!isValidEmail(email)) {
         setFormMessage(form, translate("invalidEmail"), true);
         return;
       }
 
-      const result = await subscribe(email);
-      if (result.ok) {
-        setFormMessage(form, "");
-        showToast(translate("success"));
-        form.reset();
-        closeModal();
-        return;
-      }
-
-      setFormMessage(form, translate("invalidEmail"), true);
+      pendingSubscriptionEmail = email;
+      openModal();
     });
   });
 }
@@ -1147,7 +1360,11 @@ function openModal() {
   if (!modal) return;
   modal.hidden = false;
   document.body.classList.add("modal-open");
-  setTimeout(() => $("#modal-email")?.focus(), 0);
+  const emailField = $("#modal-email");
+  if (emailField) {
+    emailField.value = pendingSubscriptionEmail || emailField.value;
+  }
+  setTimeout(() => $("#modal-consent")?.focus(), 0);
 }
 
 function closeModal() {
@@ -1159,7 +1376,10 @@ function closeModal() {
 
 function bindModal() {
   $$("[data-open-modal]").forEach((button) => {
-    button.addEventListener("click", openModal);
+    button.addEventListener("click", () => {
+      pendingSubscriptionEmail = "";
+      openModal();
+    });
   });
 
   $$("[data-close-modal]").forEach((button) => {
@@ -1169,6 +1389,46 @@ function bindModal() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeModal();
   });
+
+  const modalForm = document.querySelector(".modal-panel [data-subscribe-form]");
+  if (modalForm) {
+    modalForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(modalForm);
+      const email = String(formData.get("email") || pendingSubscriptionEmail || "").trim();
+      const consent = formData.get("consent") === "on";
+
+      if (!isValidEmail(email)) {
+        setFormMessage(modalForm, translate("invalidEmail"), true);
+        return;
+      }
+
+      if (!consent) {
+        setFormMessage(modalForm, translate("consentLabel"), true);
+        return;
+      }
+
+      let recaptchaToken = "";
+      try {
+        recaptchaToken = await getRecaptchaToken();
+      } catch (error) {
+        setFormMessage(modalForm, translate("invalidEmail"), true);
+        return;
+      }
+
+      const result = await subscribe(email, recaptchaToken, consent);
+      if (result.ok) {
+        setFormMessage(modalForm, "");
+        showToast(translate("success"));
+        pendingSubscriptionEmail = "";
+        modalForm.reset();
+        closeModal();
+        return;
+      }
+
+      setFormMessage(modalForm, translate("invalidEmail"), true);
+    });
+  }
 }
 
 function closeIssueModal() {
@@ -1196,7 +1456,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
 
   const localIssue = newsletters.find((item) => String(item.detailKey || item.campaignKey || item.id) === String(issueKey));
   if (localIssue?.detailHtml) {
-    const cleanedHtml = stripNewsletterFooter(localIssue.detailHtml);
+    const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(localIssue.detailHtml));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(localIssue.summary?.ko || localIssue.summary?.en || localIssue.title?.ko || "")}</pre>`;
     if (loading) loading.hidden = true;
     return;
@@ -1211,7 +1471,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
     const text = data?.item?.text;
     if (!data?.ok || (!html && !text)) throw new Error("Newsletter detail response is invalid");
 
-    const cleanedHtml = stripNewsletterFooter(html);
+    const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(html));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(text)}</pre>`;
   } catch (error) {
     console.warn("Newsletter detail fallback.", error);
@@ -1403,6 +1663,7 @@ bindNewsletterDetails();
 bindNewsletterPagination();
 bindLanguageToggle();
 bindRssTabs();
+bindRssAutoRefresh();
 bindShare();
 bindParallax();
 bindScrollMotion();

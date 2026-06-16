@@ -269,11 +269,11 @@
                 <input
                   id="rail-email"
                   name="email"
-                  type="email"
-                  autocomplete="email"
-                  placeholder="email@example.com"
-                  required
-                />
+                type="email"
+                autocomplete="email"
+                placeholder="email@example.com"
+                required
+              />
                 <button class="button button-primary" type="submit" data-i18n="subscribeShort">
                   무료 구독
                 </button>
@@ -507,6 +507,10 @@
             placeholder="email@example.com"
             required
           />
+          <label class="consent-row">
+            <input id="modal-consent" type="checkbox" name="consent" required />
+            <span class="consent-text" data-i18n="consentLabel">개인정보 수집 및 뉴스레터 수신 동의</span>
+          </label>
           <button class="button button-primary" type="submit" data-i18n="subscribeCta">
             무료로 구독하기
           </button>
@@ -520,14 +524,17 @@
       <section class="issue-modal-panel" role="dialog" aria-modal="true" aria-label="Newsletter detail">
         <button class="issue-modal-close" type="button" aria-label="Close newsletter detail" data-close-issue></button>
         <div class="issue-browser-shell" aria-hidden="true">
-          <iframe
-            class="issue-frame"
-            title="Newsletter issue"
-            sandbox="allow-popups allow-popups-to-escape-sandbox"
-            data-issue-frame
-          ></iframe>
+          <div class="issue-frame-wrap">
+            <iframe
+              class="issue-frame"
+              title="Newsletter issue"
+              sandbox="allow-popups allow-popups-to-escape-sandbox"
+              data-issue-frame
+            ></iframe>
+          </div>
           <div class="issue-loading" data-issue-loading>Loading...</div>
           <img class="issue-browser-svg" src="assets/browser-dark.svg" alt="" aria-hidden="true">
+          <img class="issue-mobile-svg" src="assets/Steppers2.svg" alt="" aria-hidden="true">
         </div>
       </section>
     </div>
