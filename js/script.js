@@ -60,6 +60,7 @@ const content = {
     statThreeDesc: "메일함에서 바로 확인",
     latestEyebrow: "뉴스레터 리스트",
     latestTitle: "최근 도착한 브리핑",
+    loadingNewsletters: "뉴스레터 불러오는 중...",
     sortLatest: "최신순",
     viewMore: "전체보기",
     loadMore: "더보기",
@@ -217,6 +218,7 @@ const content = {
     statThreeDesc: "Delivered to your inbox",
     latestEyebrow: "Newsletter archive",
     latestTitle: "Recently delivered briefings",
+    loadingNewsletters: "Loading newsletters...",
     sortLatest: "Latest",
     viewMore: "View all",
     loadMore: "More",
@@ -674,9 +676,9 @@ function formatIssueDate(value) {
   if (Number.isNaN(date.getTime())) return String(value).replaceAll("-", ".");
 
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}.${month}.${day}`;
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}년 ${month}월 ${day}일 발행`;
 }
 
 function getNewsletterDetailUrl(item) {
@@ -799,9 +801,27 @@ function normalizeNewsletterIssue(issue) {
   };
 }
 
+function normalizeLegacyNewsletterIssue(issue) {
+  const fallbackTitle = issue.title?.ko || issue.title?.en || (currentLanguage === "ko" ? "뉴밍 위클리" : "Newming Weekly");
+  const fallbackSummary = issue.summary?.ko || issue.summary?.en || "";
+
+  return {
+    ...issue,
+    title: {
+      ko: issue.title?.ko || fallbackTitle,
+      en: issue.title?.en || fallbackTitle,
+    },
+    summary: {
+      ko: issue.summary?.ko || fallbackSummary,
+      en: issue.summary?.en || fallbackSummary,
+    },
+    date: formatIssueDate(issue.issueDate || issue.sentAt || issue.date),
+  };
+}
+
 function setNewsletterCollections(dailyIssue, legacyIssues) {
   dailyNewsletter = dailyIssue || null;
-  legacyNewsletters = Array.isArray(legacyIssues) ? [...legacyIssues] : [];
+  legacyNewsletters = Array.isArray(legacyIssues) ? legacyIssues.map(normalizeLegacyNewsletterIssue) : [];
   newsletterFeatured = dailyNewsletter;
   newsletters = dailyNewsletter ? [dailyNewsletter, ...legacyNewsletters] : [...legacyNewsletters];
   newsletters = newsletters
@@ -887,14 +907,9 @@ function renderHeroPreview() {
   if (phoneImage) phoneImage.src = image;
 }
 
-function renderNewsletters() {
-  const list = $("[data-newsletter-list]");
-  const count = $("[data-newsletter-count]");
-  if (!list) return;
-
-  if (newslettersLoading) {
-    if (count) count.textContent = translate("loadingMore");
-    list.innerHTML = `
+function renderNewsletterLoadingPlaceholders(type) {
+  if (type === "list") {
+    return `
       <article class="newsletter-item newsletter-item-placeholder" aria-hidden="true">
         <span class="newsletter-list-placeholder-image"></span>
         <span class="newsletter-list-placeholder-body">
@@ -903,6 +918,51 @@ function renderNewsletters() {
           <span class="newsletter-card-placeholder-line is-short"></span>
         </span>
       </article>
+      <article class="newsletter-item newsletter-item-placeholder" aria-hidden="true">
+        <span class="newsletter-list-placeholder-image"></span>
+        <span class="newsletter-list-placeholder-body">
+          <span class="newsletter-card-placeholder-line is-title"></span>
+          <span class="newsletter-card-placeholder-line"></span>
+          <span class="newsletter-card-placeholder-line is-short"></span>
+        </span>
+      </article>
+      <article class="newsletter-item newsletter-item-placeholder" aria-hidden="true">
+        <span class="newsletter-list-placeholder-image"></span>
+        <span class="newsletter-list-placeholder-body">
+          <span class="newsletter-card-placeholder-line is-title"></span>
+          <span class="newsletter-card-placeholder-line"></span>
+          <span class="newsletter-card-placeholder-line is-short"></span>
+        </span>
+      </article>
+    `;
+  }
+
+  return Array.from({ length: NEWSLETTER_CARD_LIMIT }, () => `
+    <article class="newsletter-card newsletter-card-placeholder" aria-hidden="true">
+      <span class="newsletter-card-placeholder-image"></span>
+      <span class="newsletter-card-body">
+        <span class="newsletter-card-placeholder-line is-title"></span>
+        <span class="newsletter-card-placeholder-line is-date"></span>
+        <span class="newsletter-card-placeholder-line"></span>
+        <span class="newsletter-card-placeholder-line"></span>
+        <span class="newsletter-card-placeholder-line is-short"></span>
+      </span>
+    </article>
+  `).join("");
+}
+
+function renderNewsletters() {
+  const list = $("[data-newsletter-list]");
+  const count = $("[data-newsletter-count]");
+  if (!list) return;
+
+  if (newslettersLoading) {
+    if (count) count.textContent = translate("loadingNewsletters");
+    list.innerHTML = `
+      <div class="newsletter-loading-copy" aria-live="polite">${translate("loadingNewsletters")}</div>
+      <div class="newsletter-list-skeleton">
+        ${renderNewsletterLoadingPlaceholders("list")}
+      </div>
     `;
     return;
   }
@@ -960,18 +1020,7 @@ function renderNewsletterCards() {
   if (!list) return;
 
   if (newslettersLoading || !newsletterArchives.length) {
-    list.innerHTML = Array.from({ length: NEWSLETTER_CARD_LIMIT }, () => `
-      <article class="newsletter-card newsletter-card-placeholder" aria-hidden="true">
-        <span class="newsletter-card-placeholder-image"></span>
-        <span class="newsletter-card-body">
-          <span class="newsletter-card-placeholder-line is-title"></span>
-          <span class="newsletter-card-placeholder-line is-date"></span>
-          <span class="newsletter-card-placeholder-line"></span>
-          <span class="newsletter-card-placeholder-line"></span>
-          <span class="newsletter-card-placeholder-line is-short"></span>
-        </span>
-      </article>
-    `).join("");
+    list.innerHTML = renderNewsletterLoadingPlaceholders("cards");
     return;
   }
 
@@ -1570,14 +1619,22 @@ function bindParallax() {
   if (!layers.length) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+  const heroSection = $(".visual-hero");
+  const isMobile = window.matchMedia("(max-width: 760px)");
+  let heroActive = !heroSection;
   let ticking = false;
 
   function update() {
+    if (!heroActive) {
+      ticking = false;
+      return;
+    }
     const viewportCenter = window.innerHeight / 2;
+    const mobileScale = isMobile.matches ? 0.72 : 1;
     layers.forEach((layer) => {
       const speed = Number(layer.dataset.parallaxSpeed || 0);
       const rect = layer.getBoundingClientRect();
-      const offset = (viewportCenter - rect.top - rect.height / 2) * speed;
+      const offset = (viewportCenter - rect.top - rect.height / 2) * speed * mobileScale;
       layer.style.setProperty("--parallax-y", `${offset.toFixed(2)}px`);
     });
     ticking = false;
@@ -1589,9 +1646,80 @@ function bindParallax() {
     requestAnimationFrame(update);
   }
 
+  if (heroSection && "IntersectionObserver" in window) {
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        heroActive = Boolean(entry?.isIntersecting);
+        requestUpdate();
+      },
+      {
+        rootMargin: "-10% 0px -25% 0px",
+        threshold: 0.08,
+      },
+    );
+    heroObserver.observe(heroSection);
+  } else {
+    heroActive = true;
+  }
+
   update();
   window.addEventListener("scroll", requestUpdate, { passive: true });
   window.addEventListener("resize", requestUpdate);
+  isMobile.addEventListener("change", requestUpdate, { passive: true });
+}
+
+function bindMobileSubscribeFab() {
+  const fab = $(".mobile-subscribe-fab");
+  if (!fab) return;
+
+  const hero = $(".delivery-hero");
+  const bottomButton = $(".bottom-cta .bottom-submit");
+  const mobileOnly = window.matchMedia("(max-width: 760px)");
+
+  let heroVisible = false;
+  let bottomVisible = false;
+
+  function updateFab() {
+    const hidden = !mobileOnly.matches || heroVisible || bottomVisible;
+    fab.classList.toggle("is-hidden", hidden);
+    fab.setAttribute("aria-hidden", hidden ? "true" : "false");
+  }
+
+  if (!mobileOnly.matches) {
+    updateFab();
+    return;
+  }
+
+  if (!("IntersectionObserver" in window)) {
+    updateFab();
+    return;
+  }
+
+  const heroObserver = hero
+    ? new IntersectionObserver(
+        ([entry]) => {
+          heroVisible = Boolean(entry?.isIntersecting);
+          updateFab();
+        },
+        { threshold: 0.08, rootMargin: "0px 0px -20% 0px" },
+      )
+    : null;
+
+  const bottomObserver = bottomButton
+    ? new IntersectionObserver(
+        ([entry]) => {
+          bottomVisible = Boolean(entry?.isIntersecting);
+          updateFab();
+        },
+        { threshold: 0.18, rootMargin: "0px 0px -10% 0px" },
+      )
+    : null;
+
+  if (heroObserver && hero) heroObserver.observe(hero);
+  if (bottomObserver && bottomButton) bottomObserver.observe(bottomButton);
+
+  mobileOnly.addEventListener("change", updateFab, { passive: true });
+  updateFab();
 }
 
 function bindScrollMotion() {
@@ -1694,6 +1822,7 @@ bindRssTabs();
 bindRssAutoRefresh();
 bindShare();
 bindParallax();
+bindMobileSubscribeFab();
 bindScrollMotion();
 bindLocalAutoReload();
 applyLanguage("ko");

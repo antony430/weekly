@@ -197,13 +197,13 @@
     gap: 8px;
   }
 
+  .header-subscribe {
+    display: none;
+  }
+
   .header-actions .button {
     min-height: 40px;
     font-size: 13px;
-  }
-
-  .header-subscribe {
-    width: 84px;
   }
 
   .icon-button {
@@ -225,7 +225,7 @@
 
 @media (max-width: 420px) {
   .brand {
-    max-width: calc(100vw - 236px);
+    /*max-width: calc(100vw - 236px);*/
     min-width: 0;
     font-size: 16px;
     overflow: hidden;
