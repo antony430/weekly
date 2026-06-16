@@ -162,11 +162,17 @@ const content = {
     footerBizCheck: "사업자정보확인",
     footerCompanyLine2Suffix: "서울특별시 영등포구 국회대로70길 23, 7층(여의도동, 용산빌딩) 이메일 : hello@griplabs.io",
     footerYouth: "청소년 보호정책(책임자 : 윤여진)",
-    footerTerms: "서비스 이용 약관",
+    footerTerms: "이용 약관",
     footerPrivacyLink: "개인정보 처리 방침",
-    footerYouthLink: "청소년 보호 방침",
-    footerPrinciple: "기사 배열 원칙",
-    footerCopyright: "Copyright © 2024 Grip Labs Inc. 모든 권리 보유.",
+    footerIP: "저작권 안내",
+    footerCopyright: "Copyright © 2026 Grip Labs Inc. 모든 권리 보유.",
+    copyrightTitle: "뉴밍 위클리 저작권 안내",
+    copyrightCopy1: "뉴밍 위클리에 포함된 기사와 이미지의 저작권은 각 권리자에게 있으며, 무단전재와 재배포를 금합니다.",
+    copyrightCopy2:
+      "본사의 허락 없이 기사 전문을 인터넷에 게시하는 행위는 무단전재에 해당하며, 상업적·비상업적 이용을 불문하고 권리자의 허락이 필요합니다.",
+    copyrightCopy3:
+      "기사 일부와 함께 뉴밍 위클리 웹 링크 또는 뉴밍 웹사이트로 연결되는 링크를 함께 공유하는 방식은 허용될 수 있습니다.",
+    copyrightCopy4: "위 내용은 저작권법에 따라 보호되며, 침해 시 관련 법령에 따른 책임이 발생할 수 있습니다.",
     modalEyebrow: "뉴밍 위클리 무료 구독",
     modalTitle: "최신 뉴스레터를 이메일로 받아보세요",
     modalCopy: "개인 설정 없이, 뉴밍 위클리의 고정 브리핑 포맷을 이메일로 받아보세요.",
@@ -313,18 +319,28 @@ const content = {
     footerNewming: "Newming",
     footerGrip: "Griplabs",
     footerPrivacy: "Privacy Policy",
-    footerCompanyLine1: "Business registration number: 348-86-01356 · CEO: Kim Seok-hwan · Internet news service registration: Seoul Ja-60122",
+    footerCompanyLine1:
+      "Business registration number: 348-86-01356 · CEO: Kim Seok-hwan · Internet news service registration number: Seoul Ja-60122",
     footerCompanyLine2:
       "Mail-order business registration: 2022-Seoul-Yeongdeungpo-0291 · Business info verification · 7F, 23 Gukhoe-daero 70-gil, Yeongdeungpo-gu, Seoul, Korea · hello@griplabs.io",
-    footerCompanyLine2Prefix: "Mail-order business registration: 2022-Seoul-Yeongdeungpo-0291",
+    footerCompanyLine2Prefix: "Mail-order business registration number: 2022-Seoul-Yeongdeungpo-0291",
     footerBizCheck: "Business info verification",
     footerCompanyLine2Suffix: "7F, 23 Gukhoe-daero 70-gil, Yeongdeungpo-gu, Seoul, Korea · hello@griplabs.io",
-    footerYouth: "Youth Protection Policy · Officer: Yoon Yeo-jin",
+    footerYouth: "Youth Protection Policy (Officer: Yoon Yeo-jin)",
     footerTerms: "Terms of Service",
     footerPrivacyLink: "Privacy Policy",
-    footerYouthLink: "Youth Protection Policy",
+    footerIP: "Copyright notice",
     footerPrinciple: "Article selection policy",
     footerCopyright: "Copyright © 2026 Grip Labs Inc. All rights reserved.",
+    copyrightTitle: "Newming Weekly copyright notice",
+    copyrightCopy1:
+      "The copyright for articles and images included in Newming Weekly belongs to the respective rights holders. Unauthorized reproduction and redistribution are prohibited.",
+    copyrightCopy2:
+      "Publishing the full text of an article on the internet without our permission is considered unauthorized reproduction, and permission from the rights holder is required regardless of commercial or non-commercial use.",
+    copyrightCopy3:
+      "Sharing a portion of an article together with a Newming Weekly web link or a link that leads to the Newming website may be permitted.",
+    copyrightCopy4:
+      "The above is protected under copyright law, and infringement may result in liability under applicable laws.",
     modalEyebrow: "Subscribe to Newming Weekly",
     modalTitle: "Get the latest issues by email",
     modalCopy: "Leave your email to receive Newming Weekly's fixed briefing format.",
@@ -1496,6 +1512,34 @@ function bindModal() {
   }
 }
 
+function openCopyrightModal() {
+  const modal = $("[data-copyright-modal]");
+  if (!modal) return;
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeCopyrightModal() {
+  const modal = $("[data-copyright-modal]");
+  if (!modal) return;
+  modal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+function bindCopyrightModal() {
+  $$("[data-open-copyright]").forEach((button) => {
+    button.addEventListener("click", openCopyrightModal);
+  });
+
+  $$("[data-close-copyright]").forEach((button) => {
+    button.addEventListener("click", closeCopyrightModal);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeCopyrightModal();
+  });
+}
+
 function closeIssueModal() {
   const modal = $("[data-issue-modal]");
   const frame = $("[data-issue-frame]");
@@ -1815,6 +1859,7 @@ function bindLocalAutoReload() {
 
 bindForms();
 bindModal();
+bindCopyrightModal();
 bindNewsletterDetails();
 bindNewsletterPagination();
 bindLanguageToggle();
