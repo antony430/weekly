@@ -1,3 +1,5 @@
 .DS_Store
 .playwright-cli/
 output/
+docs/
+styles.css
