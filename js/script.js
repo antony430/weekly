@@ -547,8 +547,8 @@ function injectIssueViewportStyles(html) {
       font-size: 15px !important;
       line-height: 1.55 !important;
     }
-    h1 { font-size: 28px !important; line-height: 1.18 !important; }
-    h2 { font-size: 24px !important; line-height: 1.22 !important; }
+    h1 { font-size: 24px !important; line-height: 1.18 !important; }
+    h2 { font-size: 22px !important; line-height: 1.22 !important; }
     h3 { font-size: 20px !important; line-height: 1.24 !important; }
     h4 { font-size: 18px !important; line-height: 1.28 !important; }
     h5 { font-size: 16px !important; line-height: 1.28 !important; }
