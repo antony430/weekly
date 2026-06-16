@@ -2493,10 +2493,11 @@ body {
   }
 
   .mobile-subscribe-fab, .mobile-subscribe-fab__button{
-    border-radius: 24px 24px 0 0;
-    font-size: 16px;
-    font-weight: 500;
+    border-radius: 0;
+    font-size: 17px;
+    font-weight: 700;
     height: 92px;
+    letter-spacing: -2.5%;
   }
 
 }
