@@ -1884,7 +1884,7 @@ body {
 
 .newsletter-thumb {
   display: block;
-  width: 196px;
+  /*width: 196px;*/
   border-radius: 12px;
   max-height: 120px;
   overflow: hidden;
@@ -2381,7 +2381,7 @@ body {
     font-size: 17px;
   }
 
-  .newsletter-item p {
+  .newsletter-card p {
     display: none;
   }
 
@@ -3484,9 +3484,9 @@ body {
 }
 
 .feature-card-mobile .feature-visual img {
-  width: min(48%, 240px);
-  min-width: 190px;
-  margin-top: 52px;
+  width: min(80%, 240px);
+  /*min-width: 190px;*/
+  margin-top: 40px;
   filter: drop-shadow(0 26px 42px rgba(23, 31, 42, 0.18));
 }
 
@@ -3530,6 +3530,7 @@ body {
   height: 190px;
 }
 
+/*
 .feature-flow-map::before,
 .feature-flow-map i {
   content: "";
@@ -3537,7 +3538,7 @@ body {
   inset: 55px 60px auto;
   height: 2px;
   background: linear-gradient(90deg, rgba(49, 130, 246, 0), rgba(49, 130, 246, 0.55), rgba(49, 130, 246, 0));
-}
+}*/
 
 .feature-flow-map i {
   inset: 94px 96px auto;
@@ -3580,7 +3581,7 @@ body {
 
 .feature-inbox-card {
   width: min(72%, 430px);
-  padding: 28px;
+  padding: 10px;
   color: #25272c;
 }
 
