@@ -1,5 +1,7 @@
 const NEWSLETTER_API_BASE_URL = "http://54.116.114.103:8092";
-const NEWSLETTER_API_URL = `${NEWSLETTER_API_BASE_URL}/api/newsletter/issues`;
+const NEWSLETTER_API_PATH = "/api/newsletter/issues";
+const NEWSLETTER_API_URL = NEWSLETTER_API_PATH;
+const NEWSLETTER_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${NEWSLETTER_API_PATH}`;
 const SUBSCRIBE_API_URL = "";
 const RECAPTCHA_SITE_KEY = "6Le6ox8tAAAAAOvxaDKuBwh52KlhacOxpXHjW4RS";
 const RECAPTCHA_ACTION = "subscribe";
@@ -680,23 +682,36 @@ function formatIssueDate(value) {
 function getNewsletterDetailUrl(item) {
   const key = item.campaignKey || item.id;
   if (!key) return "#";
-  return `${NEWSLETTER_API_BASE_URL}/api/newsletter/issues/${encodeURIComponent(key)}`;
+  return `${NEWSLETTER_API_PATH}/${encodeURIComponent(key)}`;
 }
 
 function getNewsletterListUrl(limit, offset) {
-  const url = new URL(NEWSLETTER_API_URL);
+  const url = new URL(NEWSLETTER_API_URL, window.location.origin);
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
   return url.toString();
 }
 
 async function fetchNewsletterIssues(limit, offset) {
-  const response = await fetch(getNewsletterListUrl(limit, offset), { cache: "no-store" });
-  if (!response.ok) throw new Error("Newsletter API request failed");
+  const urls = [getNewsletterListUrl(limit, offset)];
+  if (NEWSLETTER_API_FALLBACK_URL !== urls[0]) {
+    urls.push(`${NEWSLETTER_API_FALLBACK_URL}?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`);
+  }
 
-  const data = await response.json();
-  if (!data?.ok || !Array.isArray(data.items)) throw new Error("Newsletter API response is invalid");
-  return data;
+  let lastError;
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("Newsletter API request failed");
+
+      const data = await response.json();
+      if (!data?.ok || !Array.isArray(data.items)) throw new Error("Newsletter API response is invalid");
+      return data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Newsletter API request failed");
 }
 
 async function fetchLegacyNewsletterIssues() {
@@ -1464,13 +1479,25 @@ async function openIssueModal(issueKey, fallbackUrl) {
   }
 
   try {
-    const url = `${NEWSLETTER_API_BASE_URL}/api/newsletter/issues/${encodeURIComponent(issueKey)}`;
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Newsletter detail request failed");
-    const data = await response.json();
+    const urls = [
+      `${NEWSLETTER_API_PATH}/${encodeURIComponent(issueKey)}`,
+      `${NEWSLETTER_API_FALLBACK_URL}/${encodeURIComponent(issueKey)}`,
+    ];
+    let data = null;
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error("Newsletter detail request failed");
+        data = await response.json();
+        if (!data?.ok || (!data?.item?.html && !data?.item?.text)) throw new Error("Newsletter detail response is invalid");
+        break;
+      } catch (error) {
+        data = null;
+      }
+    }
     const html = data?.item?.html;
     const text = data?.item?.text;
-    if (!data?.ok || (!html && !text)) throw new Error("Newsletter detail response is invalid");
+    if (!data || (!html && !text)) throw new Error("Newsletter detail response is invalid");
 
     const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(html));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(text)}</pre>`;
