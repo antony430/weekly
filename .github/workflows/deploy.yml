@@ -32,19 +32,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: |
-            ./index.html
-            ./404.html
-            ./404.css
-            ./styles.css
-            ./header.css
-            ./footer.css
-            ./script.js
-            ./assets
-            ./manifest.webmanifest
-            ./favicon.ico
-            ./favicon.svg
-            ./favicon-180.png
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
