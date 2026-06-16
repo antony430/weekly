@@ -2999,8 +2999,8 @@ body {
 .visual-hero .phone-live-content {
   position: absolute;
   top: calc(10.1% + 28px);
-  right: calc(8.8% + 20px);
-  left: calc(8.8% + 20px);
+  right: calc(8.8% + 4px);
+  left: calc(8.8% + 4px);
   z-index: 2;
   max-height: 54%;
   overflow: hidden;
@@ -3892,7 +3892,7 @@ body {
 
   .visual-hero .hero-mini-card-right {
     right: 0;
-    top: 20px;
+    top: 34px;
   }
 
   .visual-hero .hero-mini-card span {
