@@ -1196,14 +1196,7 @@ async function tryLoadRss(category = currentRssCategory) {
 }
 
 function bindRssAutoRefresh() {
-  const refresh = () => {
-    tryLoadRss(currentRssCategory);
-  };
-
-  window.setInterval(refresh, 60 * 60 * 1000);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") refresh();
-  });
+  tryLoadRss(currentRssCategory);
 }
 
 function setFormMessage(form, message, isError = false) {
