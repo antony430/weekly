@@ -1001,6 +1001,28 @@ img {
   color: var(--color-muted);
 }
 
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+.recaptcha-disclosure {
+  margin: -2px 0 2px;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.recaptcha-disclosure a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.recaptcha-disclosure a:hover {
+  color: var(--color-text);
+}
+
 .consent-link,
 .inline-policy-link {
   color: var(--color-muted);
@@ -1784,7 +1806,7 @@ img {
 }
 
 .consent-row span {
-  display: block;
+  /*display: block;*/
   color: inherit;
 }
 
@@ -2996,7 +3018,7 @@ body {
 
 /* Bottom subscription banner */
 .bottom-cta {
-  padding: 72px 0;
+  padding: 40px 0;
   border-top: 1px solid #ece8e0;
   color: var(--color-text);
 }
@@ -3062,7 +3084,7 @@ body {
 
 .consent-row {
     display: flex;
-    flex-wrap: wrap;
+    /*flex-wrap: wrap;*/
     gap: 16px;
     align-items: center;
 }
@@ -3168,7 +3190,6 @@ body {
   }
 
   .consent-row {
-    display: grid;
     gap: 10px;
   }
 

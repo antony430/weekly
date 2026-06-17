@@ -189,6 +189,11 @@ const content = {
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
     subscribeError: "구독 신청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
     recaptchaError: "보안 확인을 완료하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    recaptchaNoticePrefix: "이 사이트는 reCAPTCHA로 보호되며 Google",
+    recaptchaPrivacy: "개인정보처리방침",
+    recaptchaNoticeMiddle: "및",
+    recaptchaTerms: "서비스 약관",
+    recaptchaNoticeSuffix: "이 적용됩니다.",
     copied: "링크가 복사되었습니다.",
     copyFailed: "복사에 실패했습니다. 주소창의 링크를 복사해주세요.",
     totalCount: "총 {count}건",
@@ -363,6 +368,11 @@ const content = {
     invalidEmail: "Please enter a valid email address.",
     subscribeError: "We could not complete the subscription request. Please try again shortly.",
     recaptchaError: "We could not complete the security check. Please try again shortly.",
+    recaptchaNoticePrefix: "This site is protected by reCAPTCHA and the Google",
+    recaptchaPrivacy: "Privacy Policy",
+    recaptchaNoticeMiddle: "and",
+    recaptchaTerms: "Terms of Service",
+    recaptchaNoticeSuffix: "apply.",
     copied: "Link copied.",
     copyFailed: "Copy failed. Please copy the address from the browser.",
     totalCount: "{count} issues",
@@ -372,7 +382,7 @@ const content = {
 
 const policyDocuments = {
   terms: {
-    href: "docs/newming-weekly-terms-draft.md",
+    href: "https://sites.google.com/newming.co.kr/weekly-terms",
     ko: {
       kicker: "뉴밍 위클리",
       title: "뉴밍 위클리 이용약관",
@@ -423,7 +433,7 @@ const policyDocuments = {
     },
   },
   privacy: {
-    href: "docs/newming-weekly-privacy-draft.md",
+    href: "https://sites.google.com/newming.co.kr/privacy-policy",
     ko: {
       kicker: "뉴밍 위클리",
       title: "뉴밍 위클리 개인정보처리방침",
@@ -483,7 +493,7 @@ const consentNoticeDocument = {
     copy:
       "뉴스레터 발송을 위한 최소한의 개인정보를 수집하고, 뉴스 콘텐츠와 광고·마케팅 정보를 이메일로 함께 발송할 수 있습니다.",
     sourceTitle: "전체 동의 안내 보기",
-    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly/241105-현재",
+    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly",
     items: [
       {
         label: "광고성 정보 매체",
@@ -523,7 +533,7 @@ const consentNoticeDocument = {
     copy:
       "Newming Weekly collects the minimum personal information needed to send the newsletter and may send news content together with advertising or marketing information by email.",
     sourceTitle: "View full consent notice",
-    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly/241105-current",
+    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly",
     items: [
       {
         label: "Promotional channel",
