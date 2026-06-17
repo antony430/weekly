@@ -7,6 +7,8 @@ const SUBSCRIBE_API_URL = SUBSCRIBE_API_PATH;
 const SUBSCRIBE_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBE_API_PATH}`;
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
+const CONSENT_NOTICE_URL =
+  "https://sites.google.com/newming.co.kr/weekly/241105-%ED%98%84%EC%9E%AC?authuser=2";
 const NEWSLETTER_LIST_LIMIT = 1;
 const NEWSLETTER_CARD_LIMIT = 6;
 const RSS_ITEM_LIMIT = 3;
@@ -151,7 +153,9 @@ const content = {
     consentPrivacySuffix: "에 동의합니다. (필수)",
     consentMarketing: "뉴스레터 수신 및 광고성 정보 수신",
     consentMarketingSuffix: "에 동의합니다. (필수)",
-    consentLabel: "이메일 수집 및 뉴스레터 수신 동의",
+    consentCombined: "개인정보 수집 및 광고성 정보 수신 동의",
+    consentRequiredSuffix: "(필수)",
+    consentLabel: "필수 동의 항목을 확인해주세요.",
     bottomSubmit: "뉴밍 위클리 구독하기",
     footerBrand: "Newming Weekly",
     footerCopy: "주식회사 그립랩스가 제공하는 뉴스 브리핑 뉴스레터입니다.",
@@ -166,7 +170,7 @@ const content = {
     footerBizCheck: "사업자정보확인",
     footerCompanyLine2Suffix: "서울특별시 영등포구 국회대로70길 23, 7층(여의도동, 용산빌딩) 이메일 : hello@griplabs.io",
     footerYouth: "청소년 보호정책(책임자 : 윤여진)",
-    footerTerms: "이용 약관",
+    footerTerms: "이용약관",
     footerPrivacyLink: "개인정보 처리 방침",
     footerIP: "저작권 안내",
     footerCopyright: "© 2026 Grip Labs Inc.",
@@ -180,7 +184,7 @@ const content = {
     modalEyebrow: "뉴밍 위클리 무료 구독",
     modalTitle: "최신 뉴스레터를 이메일로 받아보세요",
     modalCopy: "이메일 주소만 수집해 뉴밍 위클리의 고정 브리핑 포맷을 받아보세요.",
-    consentLabel: "이메일 수집 및 뉴스레터 수신 동의",
+    consentLabel: "필수 동의 항목을 확인해주세요.",
     success: "구독 신청이 접수되었습니다.",
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
     copied: "링크가 복사되었습니다.",
@@ -317,7 +321,9 @@ const content = {
     consentPrivacySuffix: " (Required)",
     consentMarketing: "Newsletter and promotional emails",
     consentMarketingSuffix: " (Required)",
-    consentLabel: "I agree to the collection of my email address and newsletter delivery",
+    consentCombined: "Consent to personal information collection and promotional emails",
+    consentRequiredSuffix: "(Required)",
+    consentLabel: "Please confirm the required consent item.",
     bottomSubmit: "Subscribe to Newming Weekly",
     footerBrand: "Newming Weekly",
     footerCopy: "A news briefing newsletter provided by Grip Labs Inc.",
@@ -350,13 +356,204 @@ const content = {
     modalEyebrow: "Subscribe to Newming Weekly",
     modalTitle: "Get the latest issues by email",
     modalCopy: "Leave your email address to receive Newming Weekly's fixed briefing format.",
-    consentLabel: "I agree to the collection of my email address and newsletter delivery",
+    consentLabel: "Please confirm the required consent item.",
     success: "Your subscription request has been received.",
     invalidEmail: "Please enter a valid email address.",
     copied: "Link copied.",
     copyFailed: "Copy failed. Please copy the address from the browser.",
     totalCount: "{count} issues",
     rssFallback: "Read today's major news on Newming.",
+  },
+};
+
+const policyDocuments = {
+  terms: {
+    href: "docs/newming-weekly-terms-draft.md",
+    ko: {
+      kicker: "뉴밍 위클리",
+      title: "뉴밍 위클리 이용약관",
+      updated: "시행일: 2026년 6월 17일",
+      linkTitle: "전체 약관 보기",
+      sections: [
+        {
+          title: "제 1조 (목적)",
+          copy: "주식회사 그립랩스가 제공하는 뉴밍 위클리 뉴스레터 서비스의 이용 조건, 회사와 구독자의 권리·의무 및 서비스 이용 절차를 정합니다.",
+        },
+        {
+          title: "제 2조 (서비스의 제공)",
+          copy: "뉴밍 위클리는 주요 뉴스와 이슈를 선별·요약·편집해 이메일 뉴스레터로 발송합니다. 발행 주기, 구성, 이미지, 링크 및 제공 방식은 운영 상황에 따라 변경될 수 있습니다.",
+        },
+        {
+          title: "제 5조 (광고성 정보 및 광고의 게재)",
+          copy: "서비스 운영과 발행 지속성을 위해 뉴스레터 본문, 제목, 이미지, 버튼, 배너, 영상, 링크 등에 광고성 정보나 제휴 콘텐츠가 포함될 수 있습니다.",
+        },
+        {
+          title: "제 6조 (수신거절 및 구독 해지)",
+          copy: "이용자는 뉴스레터 하단의 수신거절 링크 또는 회사가 안내하는 방법을 통해 언제든지 구독을 해지할 수 있습니다.",
+        },
+      ],
+    },
+    en: {
+      kicker: "Newming Weekly",
+      title: "Newming Weekly Terms of Service",
+      updated: "Effective date: June 17, 2026",
+      linkTitle: "View full terms",
+      sections: [
+        {
+          title: "Article 1 (Purpose)",
+          copy: "These terms define the basic conditions, rights, obligations, and procedures for using the Newming Weekly newsletter service provided by Grip Labs Inc.",
+        },
+        {
+          title: "Article 2 (Service)",
+          copy: "Newming Weekly selects, summarizes, and edits major news and issues into an email newsletter. The publishing schedule, format, images, links, and delivery method may change depending on service operations.",
+        },
+        {
+          title: "Article 5 (Advertising Information)",
+          copy: "To support service operations and publishing, newsletters may include promotional information or sponsored content such as text, images, buttons, banners, videos, and links.",
+        },
+        {
+          title: "Article 6 (Unsubscribe)",
+          copy: "Subscribers may unsubscribe at any time through the unsubscribe link in the newsletter or other methods provided by the company.",
+        },
+      ],
+    },
+  },
+  privacy: {
+    href: "docs/newming-weekly-privacy-draft.md",
+    ko: {
+      kicker: "뉴밍 위클리",
+      title: "뉴밍 위클리 개인정보처리방침",
+      updated: "시행일: 2026년 6월 17일",
+      linkTitle: "전체 개인정보처리방침 보기",
+      sections: [
+        {
+          title: "제 2조 (수집하는 개인정보 항목 및 수집 방법)",
+          copy: "뉴밍 위클리는 뉴스레터 구독을 위해 이메일 주소를 필수 항목으로 수집합니다. 이름, 전화번호, 주소, 생년월일 등은 필수로 수집하지 않습니다.",
+        },
+        {
+          title: "제 3조 (개인정보의 수집 및 이용 목적)",
+          copy: "수집한 이메일 주소는 뉴스레터 발송, 구독 상태 관리, 수신거절 처리, 서비스 운영 안내 및 부정 이용 방지를 위해 사용됩니다.",
+        },
+        {
+          title: "제 4조 (개인정보의 보유 및 이용 기간)",
+          copy: "구독이 유지되는 동안 이메일 주소를 보유하며, 수신거절 또는 구독 해지 시 발송 대상에서 제외합니다.",
+        },
+        {
+          title: "제 8조 (이용자의 권리와 행사 방법)",
+          copy: "이용자는 언제든지 개인정보 열람, 정정, 삭제, 처리정지 또는 동의 철회를 요청할 수 있습니다.",
+        },
+      ],
+    },
+    en: {
+      kicker: "Newming Weekly",
+      title: "Newming Weekly Privacy Policy",
+      updated: "Effective date: June 17, 2026",
+      linkTitle: "View full privacy policy",
+      sections: [
+        {
+          title: "Article 2 (Personal Information Collected)",
+          copy: "Newming Weekly collects an email address as the required item for newsletter subscription. Name, phone number, address, and birth date are not required.",
+        },
+        {
+          title: "Article 3 (Purpose of Use)",
+          copy: "The collected email address is used to send newsletters, manage subscription status, process unsubscribe requests, provide service notices, and prevent abuse.",
+        },
+        {
+          title: "Article 4 (Retention Period)",
+          copy: "The email address is retained while the subscription remains active and is excluded from the mailing list after unsubscribe or cancellation.",
+        },
+        {
+          title: "Article 8 (User Rights)",
+          copy: "Users may request access, correction, deletion, suspension of processing, or withdrawal of consent at any time.",
+        },
+      ],
+    },
+  },
+};
+
+const consentNoticeDocument = {
+  href: CONSENT_NOTICE_URL,
+  ko: {
+    kicker: "뉴밍 위클리 구독 동의",
+    title: "개인정보 수집 및 광고성 정보 수신 동의",
+    copy:
+      "뉴스레터 발송을 위한 최소한의 개인정보를 수집하고, 뉴스 콘텐츠와 광고·마케팅 정보를 이메일로 함께 발송할 수 있습니다.",
+    sourceTitle: "전체 동의 안내 보기",
+    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly/241105-현재",
+    items: [
+      {
+        label: "광고성 정보 매체",
+        value: "이메일",
+      },
+      {
+        label: "관련 법령",
+        value: "개인정보 보호법 제22조 제4항, 제39조의3, 정보통신망법 제50조 등",
+      },
+      {
+        label: "처리 목적",
+        value: "뉴밍 위클리 서비스 및 제휴사의 상품·서비스에 대한 광고, 홍보, 프로모션 제공",
+      },
+      {
+        label: "처리 항목",
+        value: "이메일 주소",
+      },
+      {
+        label: "이용 및 보유기간",
+        value: "동의 철회 또는 구독 취소 시까지",
+      },
+      {
+        label: "제3자 제공 안내",
+        value:
+          "광고성 정보 수신 동의는 뉴스레터 발행 시 뉴스 콘텐츠와 광고·마케팅 정보를 이메일로 수신하는 것에 대한 동의입니다. 제휴사에 개인정보를 제공하는 경우에는 별도의 동의를 받습니다.",
+      },
+      {
+        label: "동의 거부 안내",
+        value:
+          "뉴밍 위클리에서는 광고성 정보 수신 동의가 필수 사항이며, 동의하지 않을 경우 서비스 이용이 제한될 수 있습니다. 뉴스레터 하단의 구독 취소를 통해 언제든지 수신 거부 또는 철회할 수 있습니다.",
+      },
+    ],
+  },
+  en: {
+    kicker: "Newming Weekly subscription consent",
+    title: "Consent to personal information collection and promotional emails",
+    copy:
+      "Newming Weekly collects the minimum personal information needed to send the newsletter and may send news content together with advertising or marketing information by email.",
+    sourceTitle: "View full consent notice",
+    sourceUrlLabel: "sites.google.com/newming.co.kr/weekly/241105-current",
+    items: [
+      {
+        label: "Promotional channel",
+        value: "Email",
+      },
+      {
+        label: "Applicable laws",
+        value:
+          "Personal Information Protection Act Articles 22(4) and 39-3, Act on Promotion of Information and Communications Network Utilization and Information Protection Article 50, and related laws",
+      },
+      {
+        label: "Purpose of processing",
+        value:
+          "Advertising, promotion, and marketing offers for Newming Weekly and partner products or services",
+      },
+      {
+        label: "Processed item",
+        value: "Email address",
+      },
+      {
+        label: "Retention and use period",
+        value: "Until consent is withdrawn or the subscription is canceled",
+      },
+      {
+        label: "Third-party provision notice",
+        value:
+          "This consent covers receiving newsletter content together with advertising or marketing information by email. If personal information is provided to a partner, separate consent will be requested.",
+      },
+      {
+        label: "Refusal notice",
+        value:
+          "Consent to promotional emails is required for Newming Weekly. If you do not agree, use of the service may be restricted. You may unsubscribe or withdraw consent at any time through the unsubscribe link at the bottom of the newsletter.",
+      },
+    ],
   },
 };
 
@@ -517,6 +714,21 @@ let newslettersLoading = true;
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+
+function syncModalOpenState() {
+  const hasOpenModal = [
+    "[data-modal]",
+    "[data-copyright-modal]",
+    "[data-policy-modal]",
+    "[data-consent-modal]",
+    "[data-issue-modal]",
+  ].some((selector) => {
+    const modal = $(selector);
+    return modal && !modal.hidden;
+  });
+
+  document.body.classList.toggle("modal-open", hasOpenModal);
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -1410,15 +1622,14 @@ function bindForms() {
       const email = String(formData.get("email") || "").trim();
 
       if (form.classList.contains("bottom-signup-form")) {
-        const privacyConsent = formData.get("privacyConsent") === "on";
-        const marketingConsent = formData.get("marketingConsent") === "on";
+        const consent = formData.get("consent") === "on";
 
         if (!isValidEmail(email)) {
           setFormMessage(form, translate("invalidEmail"), true);
           return;
         }
 
-        if (!privacyConsent || !marketingConsent) {
+        if (!consent) {
           setFormMessage(form, translate("consentLabel"), true);
           return;
         }
@@ -1458,7 +1669,7 @@ function openModal() {
   const modal = $("[data-modal]");
   if (!modal) return;
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalOpenState();
   const emailField = $("#modal-email");
   if (emailField) {
     emailField.value = pendingSubscriptionEmail || emailField.value;
@@ -1470,7 +1681,7 @@ function closeModal() {
   const modal = $("[data-modal]");
   if (!modal) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalOpenState();
 }
 
 function bindModal() {
@@ -1534,14 +1745,14 @@ function openCopyrightModal() {
   const modal = $("[data-copyright-modal]");
   if (!modal) return;
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalOpenState();
 }
 
 function closeCopyrightModal() {
   const modal = $("[data-copyright-modal]");
   if (!modal) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalOpenState();
 }
 
 function bindCopyrightModal() {
@@ -1558,12 +1769,137 @@ function bindCopyrightModal() {
   });
 }
 
+function renderPolicyModal(type) {
+  const modalData = policyDocuments[type];
+  if (!modalData) return false;
+
+  const text = modalData[currentLanguage] || modalData.ko;
+  const kicker = $("[data-policy-kicker]");
+  const title = $("[data-policy-title]");
+  const updated = $("[data-policy-updated]");
+  const summary = $("[data-policy-summary]");
+  const link = $("[data-policy-link]");
+  const linkTitle = $("[data-policy-link-title]");
+  const linkUrl = $("[data-policy-link-url]");
+
+  if (kicker) kicker.textContent = text.kicker;
+  if (title) title.textContent = text.title;
+  if (updated) updated.textContent = text.updated;
+  if (summary) {
+    summary.innerHTML = text.sections
+      .map(
+        (section) => `
+          <section class="policy-modal-section">
+            <h3>${escapeHtml(section.title)}</h3>
+            <p>${escapeHtml(section.copy)}</p>
+          </section>
+        `,
+      )
+      .join("");
+  }
+  if (link) link.href = modalData.href;
+  if (linkTitle) linkTitle.textContent = text.linkTitle;
+  if (linkUrl) linkUrl.textContent = modalData.href;
+
+  return true;
+}
+
+function openPolicyModal(type) {
+  const modal = $("[data-policy-modal]");
+  if (!modal || !renderPolicyModal(type)) return;
+  modal.hidden = false;
+  syncModalOpenState();
+}
+
+function closePolicyModal() {
+  const modal = $("[data-policy-modal]");
+  if (!modal) return;
+  modal.hidden = true;
+  syncModalOpenState();
+}
+
+function bindPolicyModal() {
+  $$("[data-open-policy]").forEach((button) => {
+    button.addEventListener("click", () => openPolicyModal(button.dataset.openPolicy));
+  });
+
+  $$("[data-close-policy]").forEach((button) => {
+    button.addEventListener("click", closePolicyModal);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closePolicyModal();
+  });
+}
+
+function renderConsentModal() {
+  const text = consentNoticeDocument[currentLanguage] || consentNoticeDocument.ko;
+  const kicker = $("[data-consent-kicker]");
+  const title = $("[data-consent-title]");
+  const copy = $("[data-consent-copy]");
+  const summary = $("[data-consent-summary]");
+  const source = $("[data-consent-source]");
+  const sourceTitle = $("[data-consent-source-title]");
+  const sourceUrl = $("[data-consent-source-url]");
+
+  if (kicker) kicker.textContent = text.kicker;
+  if (title) title.textContent = text.title;
+  if (copy) copy.textContent = text.copy;
+  if (summary) {
+    summary.innerHTML = text.items
+      .map(
+        (item) => `
+          <section class="consent-modal-item">
+            <h3>${escapeHtml(item.label)}</h3>
+            <p>${escapeHtml(item.value)}</p>
+          </section>
+        `,
+      )
+      .join("");
+  }
+  if (source) source.href = consentNoticeDocument.href;
+  if (sourceTitle) sourceTitle.textContent = text.sourceTitle;
+  if (sourceUrl) sourceUrl.textContent = text.sourceUrlLabel;
+}
+
+function openConsentModal() {
+  const modal = $("[data-consent-modal]");
+  if (!modal) return;
+  renderConsentModal();
+  modal.hidden = false;
+  syncModalOpenState();
+}
+
+function closeConsentModal() {
+  const modal = $("[data-consent-modal]");
+  if (!modal) return;
+  modal.hidden = true;
+  syncModalOpenState();
+}
+
+function bindConsentModal() {
+  $$("[data-open-consent]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      openConsentModal();
+    });
+  });
+
+  $$("[data-close-consent]").forEach((button) => {
+    button.addEventListener("click", closeConsentModal);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeConsentModal();
+  });
+}
+
 function closeIssueModal() {
   const modal = $("[data-issue-modal]");
   const frame = $("[data-issue-frame]");
   if (!modal) return;
   modal.hidden = true;
-  document.body.classList.remove("modal-open");
+  syncModalOpenState();
   if (frame) frame.removeAttribute("srcdoc");
 }
 
@@ -1577,7 +1913,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
   }
 
   modal.hidden = false;
-  document.body.classList.add("modal-open");
+  syncModalOpenState();
   if (loading) loading.hidden = false;
   frame.removeAttribute("srcdoc");
 
@@ -1877,6 +2213,8 @@ function bindLocalAutoReload() {
 
 bindForms();
 bindModal();
+bindPolicyModal();
+bindConsentModal();
 bindCopyrightModal();
 bindNewsletterDetails();
 bindNewsletterPagination();
