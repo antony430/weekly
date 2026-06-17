@@ -5,6 +5,9 @@ const NEWSLETTER_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${NEWSLETTER_API_
 const SUBSCRIBE_API_PATH = "/api/newsletter/subscribers";
 const SUBSCRIBE_API_URL = SUBSCRIBE_API_PATH;
 const SUBSCRIBE_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBE_API_PATH}`;
+const SUBSCRIBER_STATS_API_PATH = `${SUBSCRIBE_API_PATH}/stats`;
+const SUBSCRIBER_STATS_API_URL = SUBSCRIBER_STATS_API_PATH;
+const SUBSCRIBER_STATS_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBER_STATS_API_PATH}`;
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
 const CONSENT_NOTICE_URL =
@@ -727,6 +730,7 @@ let newsletterArchiveOffset = NEWSLETTER_LIST_LIMIT;
 let newsletterArchiveHasMore = false;
 let newsletterArchiveLoading = false;
 let newslettersLoading = true;
+let subscriberCount = null;
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
@@ -920,6 +924,50 @@ function animateCountUps(root = document) {
   }, 650);
 }
 
+function getSubscriberCountFromStats(stats) {
+  const candidates = [stats?.allTimeCount, stats?.totalCount, stats?.activeCount];
+  const count = candidates.map(Number).find((value) => Number.isFinite(value) && value >= 0);
+  return Number.isFinite(count) ? count : null;
+}
+
+function renderSubscriberCount(options = {}) {
+  const node = $("[data-subscriber-count]");
+  if (!node || subscriberCount === null) return;
+
+  node.dataset.countUp = String(subscriberCount);
+  node.dataset.countAnimated = "";
+
+  if (options.animate) {
+    animateCountUp(node);
+    return;
+  }
+
+  updateCountUpDisplay(node, subscriberCount);
+}
+
+async function fetchSubscriberStats() {
+  const urls = [SUBSCRIBER_STATS_API_URL, SUBSCRIBER_STATS_API_FALLBACK_URL].filter(Boolean);
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      if (data?.ok === false) continue;
+
+      const nextCount = getSubscriberCountFromStats(data);
+      if (nextCount === null) continue;
+
+      subscriberCount = nextCount;
+      renderSubscriberCount({ animate: true });
+      return;
+    } catch (error) {
+      console.info("Subscriber stats request failed.", error);
+    }
+  }
+}
+
 function formatIssueDate(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -1105,6 +1153,7 @@ function applyLanguage(language) {
   $$("[data-i18n-title]").forEach((node) => {
     node.setAttribute("title", translate(node.dataset.i18nTitle));
   });
+  renderSubscriberCount();
   $$("[data-lang-option]").forEach((button) => {
     const isActive = button.dataset.langOption === language;
     button.setAttribute("aria-pressed", String(isActive));
@@ -1715,6 +1764,7 @@ function bindForms() {
         if (result.ok) {
           setFormMessage(form, "");
           showToast(translate("success"));
+          fetchSubscriberStats();
           form.reset();
           return;
         }
@@ -1809,6 +1859,7 @@ function bindModal() {
       if (result.ok) {
         setFormMessage(modalForm, "");
         showToast(translate("success"));
+        fetchSubscriberStats();
         pendingSubscriptionEmail = "";
         modalForm.reset();
         closeModal();
@@ -2307,3 +2358,4 @@ bindScrollMotion();
 bindLocalAutoReload();
 applyLanguage("ko");
 loadNewsletters();
+fetchSubscriberStats();
