@@ -186,6 +186,7 @@ const content = {
     modalCopy: "이메일 주소만 수집해 뉴밍 위클리의 고정 브리핑 포맷을 받아보세요.",
     consentLabel: "필수 동의 항목을 확인해주세요.",
     success: "구독 신청이 접수되었습니다.",
+    submitting: "처리 중...",
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
     subscribeError: "구독 신청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
     recaptchaError: "보안 확인을 완료하지 못했습니다. 잠시 후 다시 시도해주세요.",
@@ -365,6 +366,7 @@ const content = {
     modalCopy: "Leave your email address to receive Newming Weekly's fixed briefing format.",
     consentLabel: "Please confirm the required consent item.",
     success: "Your subscription request has been received.",
+    submitting: "Processing...",
     invalidEmail: "Please enter a valid email address.",
     subscribeError: "We could not complete the subscription request. Please try again shortly.",
     recaptchaError: "We could not complete the security check. Please try again shortly.",
@@ -1526,6 +1528,29 @@ function setFormMessage(form, message, isError = false) {
   messageNode.style.color = isError ? "" : "inherit";
 }
 
+function setSubmitLoading(form, isLoading) {
+  const button = form.querySelector('button[type="submit"]');
+  if (!button) return;
+
+  if (isLoading) {
+    if (!button.dataset.idleText) {
+      button.dataset.idleText = button.textContent.trim();
+    }
+    form.dataset.submitting = "true";
+    button.disabled = true;
+    button.classList.add("is-loading");
+    button.setAttribute("aria-busy", "true");
+    button.textContent = translate("submitting");
+    return;
+  }
+
+  delete form.dataset.submitting;
+  button.disabled = false;
+  button.classList.remove("is-loading");
+  button.removeAttribute("aria-busy");
+  button.textContent = button.dataset.i18n ? translate(button.dataset.i18n) : button.dataset.idleText || button.textContent;
+}
+
 let toastTimer;
 
 function showToast(message, isError = false) {
@@ -1659,6 +1684,10 @@ function bindForms() {
       if (form.classList.contains("bottom-signup-form")) {
         const consent = formData.get("consent") === "on";
 
+        if (form.dataset.submitting === "true") {
+          return;
+        }
+
         if (!isValidEmail(email)) {
           setFormMessage(form, translate("invalidEmail"), true);
           return;
@@ -1669,15 +1698,20 @@ function bindForms() {
           return;
         }
 
+        setSubmitLoading(form, true);
+
         let recaptchaToken = "";
         try {
           recaptchaToken = await getRecaptchaToken();
         } catch (error) {
           setFormMessage(form, translate("recaptchaError"), true);
+          setSubmitLoading(form, false);
           return;
         }
 
         const result = await subscribe(email, recaptchaToken, true);
+        setSubmitLoading(form, false);
+
         if (result.ok) {
           setFormMessage(form, "");
           showToast(translate("success"));
@@ -1739,6 +1773,11 @@ function bindModal() {
   if (modalForm) {
     modalForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      if (modalForm.dataset.submitting === "true") {
+        return;
+      }
+
       const emailInput = modalForm.querySelector("#modal-email");
       const email = String(emailInput?.value || pendingSubscriptionEmail || "").trim();
       const consent = Boolean(modalForm.querySelector("#modal-consent")?.checked);
@@ -1753,15 +1792,20 @@ function bindModal() {
         return;
       }
 
+      setSubmitLoading(modalForm, true);
+
       let recaptchaToken = "";
       try {
         recaptchaToken = await getRecaptchaToken();
       } catch (error) {
         setFormMessage(modalForm, translate("recaptchaError"), true);
+        setSubmitLoading(modalForm, false);
         return;
       }
 
       const result = await subscribe(email, recaptchaToken, consent);
+      setSubmitLoading(modalForm, false);
+
       if (result.ok) {
         setFormMessage(modalForm, "");
         showToast(translate("success"));
