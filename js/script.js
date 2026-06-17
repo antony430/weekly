@@ -187,6 +187,8 @@ const content = {
     consentLabel: "필수 동의 항목을 확인해주세요.",
     success: "구독 신청이 접수되었습니다.",
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
+    subscribeError: "구독 신청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    recaptchaError: "보안 확인을 완료하지 못했습니다. 잠시 후 다시 시도해주세요.",
     copied: "링크가 복사되었습니다.",
     copyFailed: "복사에 실패했습니다. 주소창의 링크를 복사해주세요.",
     totalCount: "총 {count}건",
@@ -359,6 +361,8 @@ const content = {
     consentLabel: "Please confirm the required consent item.",
     success: "Your subscription request has been received.",
     invalidEmail: "Please enter a valid email address.",
+    subscribeError: "We could not complete the subscription request. Please try again shortly.",
+    recaptchaError: "We could not complete the security check. Please try again shortly.",
     copied: "Link copied.",
     copyFailed: "Copy failed. Please copy the address from the browser.",
     totalCount: "{count} issues",
@@ -1572,16 +1576,37 @@ async function subscribe(email, recaptchaToken = "", consent = false) {
 }
 
 function loadRecaptcha() {
-  if (window.grecaptcha?.execute) {
-    return Promise.resolve(window.grecaptcha);
-  }
-
   if (!recaptchaLoaderPromise) {
     recaptchaLoaderPromise = new Promise((resolve, reject) => {
+      const waitForExecute = () => {
+        const startedAt = Date.now();
+        const check = () => {
+          if (window.grecaptcha?.ready && window.grecaptcha.execute) {
+            window.grecaptcha.ready(() => resolve(window.grecaptcha));
+            return;
+          }
+
+          if (Date.now() - startedAt > 10000) {
+            reject(new Error("reCAPTCHA is unavailable"));
+            return;
+          }
+
+          window.setTimeout(check, 100);
+        };
+
+        check();
+      };
+
+      if (window.grecaptcha?.execute) {
+        waitForExecute();
+        return;
+      }
+
       const existing = document.querySelector('script[data-recaptcha-loader="true"]');
       if (existing) {
-        existing.addEventListener("load", () => resolve(window.grecaptcha));
+        existing.addEventListener("load", waitForExecute);
         existing.addEventListener("error", reject);
+        waitForExecute();
         return;
       }
 
@@ -1590,7 +1615,7 @@ function loadRecaptcha() {
       script.async = true;
       script.defer = true;
       script.dataset.recaptchaLoader = "true";
-      script.onload = () => resolve(window.grecaptcha);
+      script.onload = waitForExecute;
       script.onerror = () => reject(new Error("reCAPTCHA failed to load"));
       document.head.appendChild(script);
     });
@@ -1638,7 +1663,7 @@ function bindForms() {
         try {
           recaptchaToken = await getRecaptchaToken();
         } catch (error) {
-          setFormMessage(form, translate("invalidEmail"), true);
+          setFormMessage(form, translate("recaptchaError"), true);
           return;
         }
 
@@ -1650,7 +1675,7 @@ function bindForms() {
           return;
         }
 
-        setFormMessage(form, translate("invalidEmail"), true);
+        setFormMessage(form, translate("subscribeError"), true);
         return;
       }
 
@@ -1722,7 +1747,7 @@ function bindModal() {
       try {
         recaptchaToken = await getRecaptchaToken();
       } catch (error) {
-        setFormMessage(modalForm, translate("invalidEmail"), true);
+        setFormMessage(modalForm, translate("recaptchaError"), true);
         return;
       }
 
@@ -1736,7 +1761,7 @@ function bindModal() {
         return;
       }
 
-      setFormMessage(modalForm, translate("invalidEmail"), true);
+      setFormMessage(modalForm, translate("subscribeError"), true);
     });
   }
 }
