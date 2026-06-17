@@ -252,7 +252,7 @@ const content = {
     heroLayerLeftLabel: "Clustering news",
     heroLayerLeftTitle: "8 stories from major outlets",
     heroLayerLeftCopy: "Grouped by the same flow for easier reading.",
-    heroLayerRightLabel: "Subscribers",
+    heroLayerRightLabel: "Subscriber count",
     heroLayerRightTitle: "13,920",
     heroLayerRightCopy: "As of June",
     freeContent: "Recommended free content",
