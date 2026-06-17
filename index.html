@@ -342,11 +342,21 @@
               <div class="consent-row">
                 <label>
                   <input type="checkbox" name="privacyConsent" required />
-                  <span data-i18n="consentPrivacy">개인정보 수집 이용 약관 동의 (필수)</span>
+                  <span>
+                    <a class="consent-link" href="" data-consent-link="privacy" target="_blank" rel="noreferrer" data-i18n="consentPrivacy">
+                      개인정보 수집 이용 약관
+                    </a>
+                    <span data-i18n="consentPrivacySuffix">에 동의합니다. (필수)</span>
+                  </span>
                 </label>
                 <label>
                   <input type="checkbox" name="marketingConsent" required />
-                  <span data-i18n="consentMarketing">광고성 정보수신 동의 (필수)</span>
+                  <span>
+                    <a class="consent-link" href="" data-consent-link="marketing" target="_blank" rel="noreferrer" data-i18n="consentMarketing">
+                      광고성 정보수신
+                    </a>
+                    <span data-i18n="consentMarketingSuffix">에 동의합니다. (필수)</span>
+                  </span>
                 </label>
               </div>
               <button class="bottom-submit" type="submit" data-i18n="bottomSubmit">
@@ -471,7 +481,7 @@
           </button>
 
         </nav>
-        <p data-i18n="footerCopyright">Copyright © 2026 Grip Labs Inc. 모든 권리 보유.</p>
+        <p data-i18n="footerCopyright">© 2026 Grip Labs Inc.</p>
       </div>
     </footer>
 
@@ -496,7 +506,12 @@
           />
           <label class="consent-row">
             <input id="modal-consent" type="checkbox" name="consent" required />
-            <span class="consent-text" data-i18n="consentLabel">개인정보 수집 및 뉴스레터 수신 동의</span>
+            <span class="consent-text">
+              <a class="consent-link" href="" data-consent-link="privacy" target="_blank" rel="noreferrer">개인정보 수집</a>
+              및
+              <a class="consent-link" href="" data-consent-link="marketing" target="_blank" rel="noreferrer">광고성 정보 수신</a>
+              동의
+            </span>
           </label>
           <button class="button button-primary" type="submit" data-i18n="subscribeCta">
             무료로 구독하기

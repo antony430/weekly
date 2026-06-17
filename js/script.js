@@ -1,8 +1,10 @@
-const NEWSLETTER_API_BASE_URL = "http://54.116.114.103:8092";
+const NEWSLETTER_API_BASE_URL = "https://54-116-114-103.sslip.io";
 const NEWSLETTER_API_PATH = "/api/newsletter/issues";
 const NEWSLETTER_API_URL = NEWSLETTER_API_PATH;
 const NEWSLETTER_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${NEWSLETTER_API_PATH}`;
-const SUBSCRIBE_API_URL = "";
+const SUBSCRIBE_API_PATH = "/api/newsletter/subscribers";
+const SUBSCRIBE_API_URL = SUBSCRIBE_API_PATH;
+const SUBSCRIBE_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBE_API_PATH}`;
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
 const NEWSLETTER_LIST_LIMIT = 1;
@@ -29,7 +31,7 @@ const content = {
     deliveryDate: "매주 화요일 아침",
     deliveryStatus: "무료 구독",
     deliveryTitle: "한 주의 핵심 뉴스,||메일 한 통으로.",
-    deliveryCopy: "뉴밍 위클리는 흩어진 주요 이슈를 AI가 묶고, 읽기 좋은 순서로 정리해 메일함으로 보내드립니다.",
+    deliveryCopy: "뉴밍 위클리는 흩어진 주요 이슈를 AI가 묶고, ||읽기 좋은 순서로 정리해 메일함으로 보내드립니다.",
     heroEyebrow: "AI 뉴스 브리핑 뉴스레터",
     heroTitle: "뉴밍 위클리",
     heroCopy: "흩어진 주요 이슈를 AI가 묶고, 꼭 필요한 맥락만 골라 매주 이메일로 전해드립니다.",
@@ -145,8 +147,10 @@ const content = {
     bottomHeadlineTwo: "한 주의 핵심만 남깁니다. 읽기 쉬운",
     bottomHeadlineThree: "브리핑으로 메일함에 보내드려요.",
     bottomEmailPrompt: "이메일을 입력해 주세요.",
-    consentPrivacy: "이메일 주소 수집 및 이용에 동의합니다. (필수)",
-    consentMarketing: "뉴스레터 수신 및 광고성 정보 수신에 동의합니다. (필수)",
+    consentPrivacy: "이메일 주소 수집 및 이용",
+    consentPrivacySuffix: "에 동의합니다. (필수)",
+    consentMarketing: "뉴스레터 수신 및 광고성 정보 수신",
+    consentMarketingSuffix: "에 동의합니다. (필수)",
     consentLabel: "이메일 수집 및 뉴스레터 수신 동의",
     bottomSubmit: "뉴밍 위클리 구독하기",
     footerBrand: "Newming Weekly",
@@ -165,7 +169,7 @@ const content = {
     footerTerms: "이용 약관",
     footerPrivacyLink: "개인정보 처리 방침",
     footerIP: "저작권 안내",
-    footerCopyright: "Copyright © 2026 Grip Labs Inc.",
+    footerCopyright: "© 2026 Grip Labs Inc.",
     copyrightTitle: "뉴밍 위클리 저작권 안내",
     copyrightCopy1: "뉴밍 위클리에 포함된 기사와 이미지의 저작권은 각 권리자에게 있으며, 무단전재와 재배포를 금합니다.",
     copyrightCopy2:
@@ -193,7 +197,7 @@ const content = {
     deliveryDate: "Every Tuesday morning",
     deliveryStatus: "Free",
     deliveryTitle: "The week's key news,||in one email.",
-    deliveryCopy: "Newming Weekly uses AI to group scattered stories and deliver them in a clear reading order.",
+    deliveryCopy: "Newming Weekly uses AI to group scattered stories ||and deliver them in a clear reading order.",
     heroEyebrow: "AI news briefing newsletter",
     heroTitle: "Newming Weekly",
     heroCopy: "A weekly email briefing that groups scattered news into clear context and highlights what matters.",
@@ -309,8 +313,10 @@ const content = {
     bottomHeadlineTwo: "Keep the week's essentials.",
     bottomHeadlineThree: "Get a clear briefing in your inbox.",
     bottomEmailPrompt: "Enter your email.",
-    consentPrivacy: "I agree to the collection and use of my email address. (Required)",
-    consentMarketing: "I agree to receive the newsletter and promotional emails. (Required)",
+    consentPrivacy: "Collection and use of my email address",
+    consentPrivacySuffix: " (Required)",
+    consentMarketing: "Newsletter and promotional emails",
+    consentMarketingSuffix: " (Required)",
     consentLabel: "I agree to the collection of my email address and newsletter delivery",
     bottomSubmit: "Subscribe to Newming Weekly",
     footerBrand: "Newming Weekly",
@@ -331,7 +337,7 @@ const content = {
     footerPrivacyLink: "Privacy Policy",
     footerIP: "Copyright notice",
     footerPrinciple: "Article selection policy",
-    footerCopyright: "Copyright © 2026 Grip Labs Inc.",
+    footerCopyright: "© 2026 Grip Labs Inc.",
     copyrightTitle: "Newming Weekly copyright notice",
     copyrightCopy1:
       "The copyright for articles and images included in Newming Weekly belongs to the respective rights holders. Unauthorized reproduction and redistribution are prohibited.",
@@ -1322,23 +1328,35 @@ function isValidEmail(email) {
 }
 
 async function subscribe(email, recaptchaToken = "", consent = false) {
-  if (!SUBSCRIBE_API_URL) {
+  const urls = [SUBSCRIBE_API_URL, SUBSCRIBE_API_FALLBACK_URL].filter(Boolean);
+  if (!urls.length) {
     return { ok: true };
   }
 
-  const response = await fetch(SUBSCRIBE_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email,
-      language: currentLanguage,
-      recaptchaAction: RECAPTCHA_ACTION,
-      recaptchaToken,
-      consent,
-    }),
-  });
+  const payload = {
+    email,
+    language: currentLanguage,
+    recaptchaAction: RECAPTCHA_ACTION,
+    recaptchaToken,
+    consent,
+    source: "homepage",
+  };
 
-  return { ok: response.ok };
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) return { ok: true };
+    } catch (error) {
+      // Try the next proxy URL.
+    }
+  }
+
+  return { ok: false };
 }
 
 function loadRecaptcha() {
@@ -1475,9 +1493,9 @@ function bindModal() {
   if (modalForm) {
     modalForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const formData = new FormData(modalForm);
-      const email = String(formData.get("email") || pendingSubscriptionEmail || "").trim();
-      const consent = formData.get("consent") === "on";
+      const emailInput = modalForm.querySelector("#modal-email");
+      const email = String(emailInput?.value || pendingSubscriptionEmail || "").trim();
+      const consent = Boolean(modalForm.querySelector("#modal-consent")?.checked);
 
       if (!isValidEmail(email)) {
         setFormMessage(modalForm, translate("invalidEmail"), true);

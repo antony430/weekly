@@ -1001,6 +1001,18 @@ img {
   color: var(--color-muted);
 }
 
+.consent-link,
+.inline-policy-link {
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.consent-link:hover,
+.inline-policy-link:hover {
+  color: var(--color-text);
+}
+
 .modal-close {
   position: absolute;
   top: 14px;
@@ -1193,10 +1205,8 @@ img {
 .copyright-modal-backdrop {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(49, 130, 246, 0.18), transparent 34%),
-    rgba(7, 11, 18, 0.72);
-  backdrop-filter: blur(12px);
+  background: rgba(7, 11, 18, 0.42);
+  backdrop-filter: blur(10px);
 }
 
 .copyright-modal-panel {
@@ -1206,12 +1216,10 @@ img {
   padding: 44px 40px 36px;
   overflow: auto;
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    radial-gradient(circle at 50% 16%, rgba(59, 130, 246, 0.14), transparent 34%),
-    linear-gradient(180deg, #050816 0%, #0b1120 100%);
-  box-shadow: 0 28px 90px rgba(2, 6, 23, 0.48);
-  color: #f8fafc;
+  border: 1px solid rgba(220, 230, 241, 0.95);
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+  color: var(--color-text);
 }
 
 .copyright-modal-panel h2 {
@@ -1223,7 +1231,7 @@ img {
 
 .copyright-modal-panel p {
   margin: 0 0 16px;
-  color: rgba(226, 232, 240, 0.88);
+  color: var(--color-muted);
   font-size: 16px;
 }
 
@@ -1233,10 +1241,10 @@ img {
   right: 18px;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(17, 19, 23, 0.1);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--color-text);
 }
 
 .copyright-modal-close::before,
@@ -1347,7 +1355,8 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  max-width: min(360px, calc(100vw - 32px));
+  width: fit-content;
+  max-width: none;
   padding: 14px 18px;
   border: 1px solid rgba(6, 27, 49, 0.08);
   border-radius: 999px;
@@ -1358,6 +1367,9 @@ img {
   font-weight: 700;
   opacity: 0;
   pointer-events: none;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
   transform: translate(-50%, -8px);
   transition:
     opacity 0.18s ease,
@@ -2614,6 +2626,10 @@ body {
   .copyright-modal-panel p {
     font-size: 15px;
     line-height: 1.65;
+  }
+
+  .copyright-modal-backdrop {
+    background: rgba(7, 11, 18, 0.38);
   }
 
 }
