@@ -418,6 +418,7 @@
     margin: 0;
     padding: 96px 0 0;
     border-radius: 0;
+    clip-path: none;
     min-height: 0;
     background: linear-gradient(180deg, #0a0e14 40%, #434b59 60%, #171f2d 100%);
   }
