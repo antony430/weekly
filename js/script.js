@@ -1,13 +1,9 @@
-const NEWSLETTER_API_BASE_URL = "https://54-116-114-103.sslip.io";
 const NEWSLETTER_API_PATH = "/api/newsletter/issues";
 const NEWSLETTER_API_URL = NEWSLETTER_API_PATH;
-const NEWSLETTER_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${NEWSLETTER_API_PATH}`;
 const SUBSCRIBE_API_PATH = "/api/newsletter/subscribers";
 const SUBSCRIBE_API_URL = SUBSCRIBE_API_PATH;
-const SUBSCRIBE_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBE_API_PATH}`;
 const SUBSCRIBER_STATS_API_PATH = `${SUBSCRIBE_API_PATH}/stats`;
 const SUBSCRIBER_STATS_API_URL = SUBSCRIBER_STATS_API_PATH;
-const SUBSCRIBER_STATS_API_FALLBACK_URL = `${NEWSLETTER_API_BASE_URL}${SUBSCRIBER_STATS_API_PATH}`;
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
 const CONSENT_NOTICE_URL =
@@ -951,7 +947,7 @@ function renderSubscriberCount(options = {}) {
 }
 
 async function fetchSubscriberStats() {
-  const urls = [SUBSCRIBER_STATS_API_URL, SUBSCRIBER_STATS_API_FALLBACK_URL].filter(Boolean);
+  const urls = [SUBSCRIBER_STATS_API_URL].filter(Boolean);
 
   for (const url of urls) {
     try {
@@ -1053,9 +1049,6 @@ function getNewsletterListUrl(limit, offset) {
 
 async function fetchNewsletterIssues(limit, offset) {
   const urls = [getNewsletterListUrl(limit, offset)];
-  if (NEWSLETTER_API_FALLBACK_URL !== urls[0]) {
-    urls.push(`${NEWSLETTER_API_FALLBACK_URL}?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`);
-  }
 
   let lastError;
   for (const url of urls) {
@@ -1727,7 +1720,7 @@ function isValidEmail(email) {
 }
 
 async function subscribe(email, recaptchaToken = "", consent = false) {
-  const urls = [SUBSCRIBE_API_URL, SUBSCRIBE_API_FALLBACK_URL].filter(Boolean);
+  const urls = [SUBSCRIBE_API_URL].filter(Boolean);
   if (!urls.length) {
     return { ok: true };
   }
@@ -2204,7 +2197,6 @@ async function openIssueModal(issueKey, fallbackUrl) {
   try {
     const urls = [
       `${NEWSLETTER_API_PATH}/${encodeURIComponent(issueKey)}`,
-      `${NEWSLETTER_API_FALLBACK_URL}/${encodeURIComponent(issueKey)}`,
     ];
     let data = null;
     for (const url of urls) {
