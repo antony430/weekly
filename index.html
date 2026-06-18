@@ -4,37 +4,85 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>뉴밍 위클리 | Newming Weekly</title>
+    <link rel="canonical" href="https://weekly.newming.io/" />
     <meta
       name="description"
       content="흩어진 주요 이슈를 AI가 묶고, 꼭 필요한 맥락만 골라 이메일로 전하는 뉴밍 위클리입니다."
     />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0a0e14" />
     <meta property="og:title" content="뉴밍 위클리" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://weekly.newming.io/" />
     <meta property="og:site_name" content="뉴밍 위클리" />
+    <meta property="og:locale" content="ko_KR" />
     <meta
       property="og:description"
       content="복잡한 뉴스는 덜어내고 한 주의 핵심만 남깁니다. 읽기 쉬운 브리핑으로 메일함에 보내드려요."
     />
-    <meta property="og:image" content="assets/newming-weekly-og.png" />
+    <meta property="og:image" content="https://weekly.newming.io/assets/newming-weekly-og.png" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
     <meta property="og:image:alt" content="뉴밍 위클리 미리보기 이미지" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="뉴밍 위클리" />
     <meta name="twitter:description" content="복잡한 뉴스는 덜어내고 한 주의 핵심만 남깁니다. 읽기 쉬운 브리핑으로 메일함에 보내드려요." />
-    <meta name="twitter:image" content="assets/newming-weekly-og.png" />
+    <meta name="twitter:image" content="https://weekly.newming.io/assets/newming-weekly-og.png" />
+    <meta name="twitter:image:alt" content="뉴밍 위클리 미리보기 이미지" />
     <link rel="icon" href="assets/newmingweekly.svg" type="image/svg+xml" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/header.css" />
     <link rel="stylesheet" href="css/footer.css" />
-    <script src="https://storage.adrop.io/js/adrop-0.1.2.min.js" type="text/javascript"></script>
+    <script defer src="https://storage.adrop.io/js/adrop-0.1.2.min.js" type="text/javascript"></script>
     <script>
       window.adrop = window.adrop || {};
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://weekly.newming.io/#organization",
+            "name": "Grip Labs Inc.",
+            "url": "https://griplabs.io/",
+            "logo": "https://weekly.newming.io/assets/newmingweekly.svg",
+            "sameAs": ["https://www.linkedin.com/company/griplabs-inc/"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://weekly.newming.io/#website",
+            "url": "https://weekly.newming.io/",
+            "name": "뉴밍 위클리",
+            "alternateName": "Newming Weekly",
+            "inLanguage": "ko-KR",
+            "publisher": { "@id": "https://weekly.newming.io/#organization" }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://weekly.newming.io/#webpage",
+            "url": "https://weekly.newming.io/",
+            "name": "뉴밍 위클리 | Newming Weekly",
+            "description": "흩어진 주요 이슈를 AI가 묶고, 꼭 필요한 맥락만 골라 이메일로 전하는 뉴밍 위클리입니다.",
+            "isPartOf": { "@id": "https://weekly.newming.io/#website" },
+            "about": { "@id": "https://weekly.newming.io/#organization" },
+            "primaryImageOfPage": {
+              "@type": "ImageObject",
+              "url": "https://weekly.newming.io/assets/newming-weekly-og.png",
+              "width": 2400,
+              "height": 1260
+            },
+            "inLanguage": "ko-KR"
+          }
+        ]
+      }
     </script>
   </head>
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="#" aria-label="Newming Weekly home">
+        <a class="brand" href="/" aria-label="Newming Weekly home">
           <img class="brand-logo" src="assets/newming_logo.svg" alt="" />
           <span data-i18n="brand">뉴밍 위클리</span>
         </a>
@@ -205,7 +253,27 @@
               <h2 data-i18n="latestTitle" data-stagger-item>최근 도착한 브리핑</h2>
             </div>
 
-            <div class="newsletter-list" data-newsletter-list></div>
+            <div class="newsletter-list" data-newsletter-list>
+              <div class="newsletter-loading-copy" aria-live="polite">뉴스레터 불러오는 중...</div>
+              <div class="newsletter-list-skeleton">
+                <article class="newsletter-item newsletter-item-placeholder" aria-hidden="true">
+                  <span class="newsletter-list-placeholder-image"></span>
+                  <span class="newsletter-list-placeholder-body">
+                    <span class="newsletter-card-placeholder-line is-title"></span>
+                    <span class="newsletter-card-placeholder-line"></span>
+                    <span class="newsletter-card-placeholder-line is-short"></span>
+                  </span>
+                </article>
+                <article class="newsletter-item newsletter-item-placeholder" aria-hidden="true">
+                  <span class="newsletter-list-placeholder-image"></span>
+                  <span class="newsletter-list-placeholder-body">
+                    <span class="newsletter-card-placeholder-line is-title"></span>
+                    <span class="newsletter-card-placeholder-line"></span>
+                    <span class="newsletter-card-placeholder-line is-short"></span>
+                  </span>
+                </article>
+              </div>
+            </div>
 
           </section>
 
@@ -312,12 +380,7 @@
                 data-adrop-slot
                 data-adrop-unit="01KTQVP236P1172NYFMGYQTQAT"
               >
-                <div class="ad-banner__fallback" data-adrop-fallback hidden>
-                  <span class="ad-kicker">ADROP</span>
-                  <strong>Espresso Two Shot</strong>
-                  <span data-i18n="adCopy">잠시, 맥락 있는 뉴스 한 잔 어때요?</span>
-                  <em data-i18n="adCta">지금 만나보기</em>
-                </div>
+                <div class="ad-banner__fallback" data-adrop-fallback hidden aria-hidden="true"></div>
               </div>
             </section>
           </div>

@@ -88,9 +88,6 @@ const content = {
     rssEntertainment: "연예",
     rssMore: "더보기",
     shareCta: "공유하기",
-    adTitle: "에이드랍 광고",
-    adCopy: "잠시, 맥락 있는 뉴스 한 잔 어때요?",
-    adCta: "지금 만나보기",
     valueEyebrow: "왜 뉴밍 위클리인가요",
     valueTitle: "복잡한 뉴스 흐름을||읽기 쉬운 맥락으로",
     valueCopy: "흩어진 기사와 이슈를 뉴스레터 안에서 바로 읽히는 카드형 흐름으로 정리합니다.",
@@ -263,9 +260,6 @@ const content = {
     rssEntertainment: "Entertainment",
     rssMore: "More",
     shareCta: "Share",
-    adTitle: "Adrop ad",
-    adCopy: "Take a quick shot of news with context.",
-    adCta: "Explore now",
     valueEyebrow: "Why Newming Weekly",
     valueTitle: "Clear context||for complex news cycles",
     valueCopy: "Scattered articles and issues are organized into a card-like flow that reads naturally inside the newsletter.",
@@ -1041,7 +1035,7 @@ function getIssuePublishedToastMessage(issue) {
 function getNewsletterDetailUrl(item) {
   const key = item.campaignKey || item.id;
   if (!key) return "#";
-  return `${NEWSLETTER_API_PATH}/${encodeURIComponent(key)}`;
+  return `/issues/${encodeURIComponent(key)}/`;
 }
 
 function getNewsletterListUrl(limit, offset) {
@@ -1416,6 +1410,8 @@ async function loadNewsletters() {
     renderNewsletters();
     renderNewsletterCards();
     renderNewsletterMoreButton();
+    revealStaggerItems($("[data-newsletter-list]"));
+    revealStaggerItems($("[data-newsletter-card-list]"));
     try {
       const legacyItems = await fetchLegacyNewsletterIssues();
       setNewsletterCollections(null, legacyItems);
@@ -1436,6 +1432,8 @@ async function loadNewsletters() {
   renderNewsletters();
   renderNewsletterCards();
   renderNewsletterMoreButton();
+  revealStaggerItems($("[data-newsletter-list]"));
+  revealStaggerItems($("[data-newsletter-card-list]"));
 
   try {
     const [apiResult, legacyResult] = await Promise.allSettled([
@@ -2313,6 +2311,17 @@ async function initAdropAds() {
   }
 }
 
+function scheduleAdropAds() {
+  const start = () => window.setTimeout(initAdropAds, 0);
+
+  if (document.readyState === "complete") {
+    start();
+    return;
+  }
+
+  window.addEventListener("load", start, { once: true });
+}
+
 function bindShare() {
   $("[data-share-link]")?.addEventListener("click", async () => {
     const url = `${window.location.origin}${window.location.pathname}`;
@@ -2556,7 +2565,7 @@ bindLanguageToggle();
 bindRssTabs();
 bindRssAutoRefresh();
 bindShare();
-initAdropAds();
+scheduleAdropAds();
 bindParallax();
 bindMobileSubscribeFab();
 bindScrollMotion();
