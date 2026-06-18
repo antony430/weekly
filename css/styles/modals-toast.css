@@ -849,6 +849,12 @@
   transform: translate(-50%, 0);
 }
 
+@media (max-width: 840px) {
+  body.modal-open .toast {
+    top: max(56px, calc(env(safe-area-inset-top) + 14px));
+  }
+}
+
 .toast.is-error {
   background: rgba(180, 35, 24, 0.78);
 }
