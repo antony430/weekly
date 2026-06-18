@@ -571,25 +571,6 @@ const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
 const NEWSLETTER_LOADING_MIN_MS = 700;
 const ISSUE_MODAL_OPEN_DURATION_MS = 460;
 const ISSUE_MODAL_CLOSE_DURATION_MS = 190;
-const ISSUE_FRAME_BASE_CSS = `
-.issue-frame-fallback {
-  white-space: pre-wrap;
-  font: 16px/1.6 sans-serif;
-  padding: 24px;
-  color: #17191c;
-}
-@media (max-width: 840px) {
-  body {
-    font-size: 15px !important;
-    line-height: 1.55 !important;
-  }
-  h1 { font-size: 24px !important; line-height: 1.18 !important; }
-  h2 { font-size: 22px !important; line-height: 1.22 !important; }
-  h3 { font-size: 20px !important; line-height: 1.24 !important; }
-  h4 { font-size: 18px !important; line-height: 1.28 !important; }
-  h5 { font-size: 16px !important; line-height: 1.28 !important; }
-  h6 { font-size: 14px !important; line-height: 1.28 !important; }
-}`;
 
 let legacyNewsletters = [];
 let dailyNewsletter = null;
@@ -599,8 +580,6 @@ let recaptchaLoaderPromise = null;
 let pendingSubscriptionEmail = "";
 let issueModalCloseTimer = null;
 let issueModalToastTimer = null;
-let issueModalDocumentUrl = "";
-let issueModalCssUrl = "";
 
 const rssSources = {
   sports: {
@@ -815,102 +794,26 @@ function stripNewsletterFooter(html) {
   return html.slice(0, cutIndex);
 }
 
-function revokeIssueModalUrls() {
-  if (issueModalDocumentUrl) URL.revokeObjectURL(issueModalDocumentUrl);
-  if (issueModalCssUrl) URL.revokeObjectURL(issueModalCssUrl);
-  issueModalDocumentUrl = "";
-  issueModalCssUrl = "";
-}
-
-function normalizeIssueStyle(style) {
-  return String(style || "")
-    .replace(/[{}<>]/g, "")
-    .split(";")
-    .map((declaration) => declaration.trim())
-    .filter(Boolean)
-    .join("; ");
-}
-
-function getIssueInlineStyleClass(style, styleClassMap, styleRules) {
-  const normalizedStyle = normalizeIssueStyle(style);
-  if (!normalizedStyle) return "";
-
-  let className = styleClassMap.get(normalizedStyle);
-  if (!className) {
-    className = `issue-inline-${String(styleClassMap.size + 1).padStart(3, "0")}`;
-    styleClassMap.set(normalizedStyle, className);
-    styleRules.push(`.${className} { ${normalizedStyle}; }`);
+function injectIssueViewportStyles(html) {
+  const viewportStyles = `
+<style>
+  @media (max-width: 840px) {
+    body {
+      font-size: 15px !important;
+      line-height: 1.55 !important;
+    }
+    h1 { font-size: 24px !important; line-height: 1.18 !important; }
+    h2 { font-size: 22px !important; line-height: 1.22 !important; }
+    h3 { font-size: 20px !important; line-height: 1.24 !important; }
+    h4 { font-size: 18px !important; line-height: 1.28 !important; }
+    h5 { font-size: 16px !important; line-height: 1.28 !important; }
+    h6 { font-size: 14px !important; line-height: 1.28 !important; }
   }
-  return className;
-}
-
-function appendIssueClassesToTag(tag, classNames) {
-  if (!classNames.length) return tag;
-
-  const classValue = classNames.join(" ");
-  if (/\sclass\s*=/.test(tag)) {
-    return tag.replace(/\sclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i, (match, doubleQuoted, singleQuoted, unquoted) => {
-      const currentClass = doubleQuoted ?? singleQuoted ?? unquoted ?? "";
-      const quote = singleQuoted !== undefined ? "'" : '"';
-      return ` class=${quote}${escapeHtml(`${currentClass} ${classValue}`)}${quote}`;
-    });
-  }
-
-  return tag.replace(/(\s*\/?>)$/, ` class="${classValue}"$1`);
-}
-
-function extractIssueStylesBeforeParse(source, styleRules) {
-  const styleClassMap = new Map();
-  const htmlWithoutStyleBlocks = String(source || "").replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (match, cssText) => {
-    if (cssText.trim()) styleRules.push(cssText);
-    return "";
-  });
-
-  return htmlWithoutStyleBlocks.replace(/<[a-z][a-z0-9:-]*(?:\s[^<>]*?)?>/gi, (tag) => {
-    if (!/\sstyle\s*=/.test(tag)) return tag;
-
-    const classNames = [];
-    const tagWithoutStyle = tag.replace(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi, (match, doubleQuoted, singleQuoted, unquoted) => {
-      const className = getIssueInlineStyleClass(doubleQuoted ?? singleQuoted ?? unquoted, styleClassMap, styleRules);
-      if (className) classNames.push(className);
-      return "";
-    });
-
-    return appendIssueClassesToTag(tagWithoutStyle, classNames);
-  });
-}
-
-function createIssueFrameUrl(html, fallbackText = "") {
-  revokeIssueModalUrls();
-
-  const source = html || `<!doctype html><html lang="${currentLanguage}"><head><meta charset="utf-8"></head><body><pre class="issue-frame-fallback">${escapeHtml(fallbackText)}</pre></body></html>`;
-  const styleRules = [ISSUE_FRAME_BASE_CSS];
-  const sanitizedSource = extractIssueStylesBeforeParse(source, styleRules);
-  const document = new DOMParser().parseFromString(sanitizedSource, "text/html");
-
-  document.querySelectorAll("style").forEach((styleNode) => {
-    if (styleNode.textContent.trim()) styleRules.push(styleNode.textContent);
-    styleNode.remove();
-  });
-
-  const defensiveStyleClassMap = new Map();
-  document.querySelectorAll("[style]").forEach((node) => {
-    const className = getIssueInlineStyleClass(node.getAttribute("style"), defensiveStyleClassMap, styleRules);
-    node.removeAttribute("style");
-    if (className) node.classList.add(className);
-  });
-
-  const cssBlob = new Blob([styleRules.join("\n\n")], { type: "text/css" });
-  issueModalCssUrl = URL.createObjectURL(cssBlob);
-
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = issueModalCssUrl;
-  document.head.appendChild(link);
-
-  const htmlBlob = new Blob([`<!doctype html>\n${document.documentElement.outerHTML}`], { type: "text/html" });
-  issueModalDocumentUrl = URL.createObjectURL(htmlBlob);
-  return issueModalDocumentUrl;
+</style>`;
+  if (!html) return html;
+  if (html.includes("</head>")) return html.replace("</head>", `${viewportStyles}</head>`);
+  if (html.includes("<body")) return html.replace("<body", `${viewportStyles}<body`);
+  return `${viewportStyles}${html}`;
 }
 
 function translate(key, params = {}) {
@@ -2258,9 +2161,7 @@ function closeIssueModal() {
     syncModalOpenState();
     if (frame) {
       frame.removeAttribute("srcdoc");
-      frame.removeAttribute("src");
     }
-    revokeIssueModalUrls();
   }, getIssueModalCloseDelay());
 }
 
@@ -2280,15 +2181,13 @@ async function openIssueModal(issueKey, fallbackUrl) {
   modal.hidden = false;
   syncModalOpenState();
   if (loading) loading.hidden = false;
-  revokeIssueModalUrls();
   frame.removeAttribute("srcdoc");
-  frame.removeAttribute("src");
 
   const localIssue = newsletters.find((item) => String(item.detailKey || item.campaignKey || item.id) === String(issueKey));
   let issueToastMessage = getIssuePublishedToastMessage(localIssue);
   if (localIssue?.detailHtml) {
-    const cleanedHtml = stripNewsletterFooter(localIssue.detailHtml);
-    frame.src = createIssueFrameUrl(cleanedHtml, localIssue.summary?.ko || localIssue.summary?.en || localIssue.title?.ko || "");
+    const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(localIssue.detailHtml));
+    frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(localIssue.summary?.ko || localIssue.summary?.en || localIssue.title?.ko || "")}</pre>`;
     finishIssueModalLoading(modal, loading, issueToastMessage);
     return;
   }
@@ -2314,8 +2213,8 @@ async function openIssueModal(issueKey, fallbackUrl) {
     if (!data || (!html && !text)) throw new Error("Newsletter detail response is invalid");
 
     if (!issueToastMessage) issueToastMessage = getIssuePublishedToastMessage(data.item);
-    const cleanedHtml = stripNewsletterFooter(html);
-    frame.src = createIssueFrameUrl(cleanedHtml, text);
+    const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(html));
+    frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(text)}</pre>`;
   } catch (error) {
     console.warn("Newsletter detail fallback.", error);
     closeIssueModal();
@@ -2403,7 +2302,55 @@ function bindShare() {
 function bindParallax() {
   const layers = $$("[data-parallax]");
   if (!layers.length) return;
-  layers.forEach((layer) => layer.removeAttribute("data-parallax-speed"));
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const heroSection = $(".visual-hero");
+  const isMobile = window.matchMedia("(max-width: 760px)");
+  let heroActive = !heroSection;
+  let ticking = false;
+
+  function update() {
+    if (!heroActive) {
+      ticking = false;
+      return;
+    }
+    const viewportCenter = window.innerHeight / 2;
+    const mobileScale = isMobile.matches ? 0.72 : 1;
+    layers.forEach((layer) => {
+      const speed = Number(layer.dataset.parallaxSpeed || 0);
+      const rect = layer.getBoundingClientRect();
+      const offset = (viewportCenter - rect.top - rect.height / 2) * speed * mobileScale;
+      layer.style.setProperty("--parallax-y", `${offset.toFixed(2)}px`);
+    });
+    ticking = false;
+  }
+
+  function requestUpdate() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  if (heroSection && "IntersectionObserver" in window) {
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        heroActive = Boolean(entry?.isIntersecting);
+        requestUpdate();
+      },
+      {
+        rootMargin: "-10% 0px -25% 0px",
+        threshold: 0.08,
+      },
+    );
+    heroObserver.observe(heroSection);
+  } else {
+    heroActive = true;
+  }
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  isMobile.addEventListener("change", requestUpdate, { passive: true });
 }
 
 function bindMobileSubscribeFab() {
@@ -2462,6 +2409,7 @@ function bindMobileSubscribeFab() {
 
 function bindScrollMotion() {
   const revealTargets = $$("[data-reveal]");
+  const parallaxSections = $$("[data-parallax-section]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (revealTargets.length) {
@@ -2485,6 +2433,30 @@ function bindScrollMotion() {
     }
   }
 
+  if (!parallaxSections.length || reducedMotion) return;
+
+  let ticking = false;
+
+  function update() {
+    const viewportCenter = window.innerHeight / 2;
+    parallaxSections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      const rawOffset = (viewportCenter - rect.top - rect.height / 2) * 0.018;
+      const offset = Math.max(-28, Math.min(28, rawOffset));
+      section.style.setProperty("--section-y", `${offset.toFixed(2)}px`);
+    });
+    ticking = false;
+  }
+
+  function requestUpdate() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  update();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
 }
 
 function bindLocalAutoReload() {

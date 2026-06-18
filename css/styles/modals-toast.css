@@ -748,7 +748,7 @@
   }
 
   .issue-modal-panel {
-    width: min(calc(100vw - 32px), 420px);
+    width: min(calc(100vw - 4px), 420px);
     margin-bottom: 0;
   }
 
