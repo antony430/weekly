@@ -101,6 +101,10 @@
   font-weight: 400;
 }
 
+.form-message.is-error {
+  color: var(--color-primary-dark);
+}
+
 .hero .form-message,
 .bottom-cta .form-message {
   color: var(--color-primary-dark);
@@ -479,6 +483,10 @@
   border-radius: 16px;
 }
 
+.right-rail__ad:not(.is-filled) {
+  display: none;
+}
+
 .content-band {
   padding: 84px 0;
   background: var(--color-bg);
@@ -790,4 +798,3 @@
 .bottom-form {
   justify-content: flex-end;
 }
-

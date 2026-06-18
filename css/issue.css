@@ -1,0 +1,92 @@
+@font-face {
+        font-family: 'Pretendard';
+        font-weight: 100 900;
+        font-display: swap;
+        src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/woff2/PretendardVariable.woff2') format('woff2-variations');
+      }
+      .newming-container,
+      .newming-container table,
+      .newming-container td,
+      .newming-container div,
+      .newming-container span,
+      .newming-container a {
+        font-family:Pretendard,'Apple SD Gothic Neo','Malgun Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif !important;
+      }
+      @media only screen and (max-width: 480px) {
+        .newming-shell { background:#ffffff !important; }
+        .newming-outer-pad { padding:0 !important; }
+        .newming-container { width:100% !important; max-width:100% !important; }
+        .newming-section { padding-left:8px !important; padding-right:8px !important; }
+        .newming-section-top { padding-top:22px !important; }
+        .newming-title { font-size:24px !important; line-height:31px !important; }
+        .newming-summary-pad { padding:20px !important; }
+        .newming-hero-img { width:100% !important; max-width:100% !important; height:auto !important; }
+        .newming-stack { display:block !important; width:100% !important; max-width:100% !important; padding-left:0 !important; padding-right:0 !important; }
+        .newming-thumb-link { display:block !important; padding-bottom:12px !important; }
+        .newming-thumb { width:100% !important; max-width:100% !important; height:auto !important; }
+        .newming-item-title { font-size:18px !important; line-height:26px !important; }
+        .newming-note { margin-top:10px !important; }
+        .newming-footer { padding-bottom:96px !important; }
+        .newming-bottom-space { height:88px !important; line-height:88px !important; font-size:1px !important; }
+      }
+
+.issue-style-001 { margin:0; padding:0; background:#f4f6f8; color:#17191c; font-family:Pretendard,'Apple SD Gothic Neo','Malgun Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; }
+.issue-style-002 { display:none; overflow:hidden; line-height:1px; opacity:0; max-height:0; max-width:0; color:#f4f6f8; }
+.issue-style-003 { width:100%; background:#f4f6f8; }
+.issue-style-004 { padding:28px 12px; }
+.issue-style-005 { width:100%; max-width:600px; background:#ffffff; border-collapse:collapse; }
+.issue-style-006 { padding:28px 28px 18px 28px; border-bottom:1px solid #e5e9ef; }
+.issue-style-007 { font-size:13px; line-height:18px; color:#6f7782; }
+.issue-style-008 { font-size:26px; line-height:34px; font-weight:800; color:#111317; padding-top:8px; }
+.issue-style-009 { font-size:15px; line-height:23px; color:#4c5561; padding-top:10px; }
+.issue-style-010 { padding:22px 28px 0 28px; }
+.issue-style-011 { width:100%; background:#111317; border-collapse:collapse; }
+.issue-style-012 { padding:22px 22px 20px 22px; }
+.issue-style-013 { font-size:13px; line-height:18px; color:#b8c2cc; }
+.issue-style-014 { font-size:22px; line-height:31px; font-weight:800; color:#ffffff; padding-top:7px; }
+.issue-style-015 { font-size:15px; line-height:23px; color:#d7dde4; padding-top:12px; }
+.issue-style-016 { padding:26px 28px 0 28px; }
+.issue-style-017 { display:block; text-decoration:none; }
+.issue-style-018 { display:block; width:100%; max-width:544px; height:auto; border:0; background:#e8edf3; }
+.issue-style-019 { font-size:13px; line-height:18px; color:#6f7782; font-weight:700; padding-top:14px; }
+.issue-style-020 { font-size:21px; line-height:29px; font-weight:800; color:#17191c; padding-top:7px; }
+.issue-style-021 { font-size:15px; line-height:24px; color:#3e4650; padding-top:10px; }
+.issue-style-022 { width:100%; margin-top:14px; background:#f3f6fb; border-collapse:collapse; }
+.issue-style-023 { padding:12px 14px; }
+.issue-style-024 { font-size:15px; line-height:21px; color:#2663eb; font-weight:600; }
+.issue-style-025 { font-size:15px; line-height:23px; color:#3e4650; padding-top:4px; }
+.issue-style-026 { margin-top:16px; }
+.issue-style-027 { background:#2663eb; padding:12px 18px; }
+.issue-style-028 { font-size:15px; line-height:18px; font-weight:700; color:#ffffff; text-decoration:none; }
+.issue-style-029 { padding:28px 28px 0 28px; }
+.issue-style-030 { font-size:18px; line-height:25px; font-weight:800; color:#17191c; }
+.issue-style-031 { padding:14px 28px 0 28px; }
+.issue-style-032 { width:100%; border-top:1px solid #e5e9ef; }
+.issue-style-033 { padding:16px 0; border-bottom:1px solid #e5e9ef; }
+.issue-style-034 { width:100%; border-collapse:collapse; }
+.issue-style-035 { width:132px; padding:2px 14px 0 0; }
+.issue-style-036 { display:block; width:132px; height:88px; border:0; background:#e8edf3; object-fit:cover; }
+.issue-style-037 { padding:0; }
+.issue-style-038 { font-size:17px; line-height:25px; font-weight:800; color:#17191c; }
+.issue-style-039 { font-size:15px; line-height:23px; color:#4c5561; padding-top:6px; }
+.issue-style-040 { padding:10px 0 0 0; }
+.issue-style-041 { padding:9px 11px; background:#f3f6fb; border-left:3px solid #2663eb; }
+.issue-style-042 { display:block; font-size:15px; line-height:21px; color:#2663eb; font-weight:600; }
+.issue-style-043 { display:block; font-size:15px; line-height:23px; color:#3e4650; padding-top:4px; }
+.issue-style-044 { padding:24px 28px 0 28px; }
+.issue-style-045 { width:100%; background:#f8fafc; border:1px solid #e5e9ef; border-collapse:collapse; }
+.issue-style-046 { padding:16px 16px 2px 16px; }
+.issue-style-047 { padding:10px 16px 4px 16px; }
+.issue-style-048 { padding:2px 0 10px 0; border-bottom:1px solid #dfe5ec; }
+.issue-style-049 { width:16px; font-size:15px; line-height:24px; color:#2663eb; font-weight:800; padding:0 8px 0 0; }
+.issue-style-050 { font-size:15px; line-height:24px; color:#3e4650; }
+.issue-style-051 { color:#2663eb; font-weight:700; }
+.issue-style-052 { padding:10px 0 10px 0; border-bottom:1px solid #dfe5ec; }
+.issue-style-053 { padding:10px 0 10px 0; }
+.issue-style-054 { padding:28px 28px 28px 28px; }
+.issue-style-055 { font-size:15px; line-height:23px; color:#4c5561; }
+.issue-style-056 { padding:22px 28px 30px 28px; background:#f8fafc; border-top:1px solid #e5e9ef; }
+.issue-style-057 { font-size:12px; line-height:19px; color:#697382; }
+.issue-style-058 { color:#697382; text-decoration:underline; }
+.issue-style-059 { color:#2663eb; text-decoration:underline; }
+.issue-style-060 { height:0; line-height:0; font-size:0; }
