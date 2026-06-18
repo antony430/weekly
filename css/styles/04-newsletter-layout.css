@@ -402,7 +402,7 @@ body {
 
 .section-heading h2 {
   font-size: 30px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.25;
 }
 
@@ -471,7 +471,7 @@ body {
 .newsletter-item h3 {
   margin-top: 8px;
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.34;
 }
 
@@ -480,6 +480,11 @@ body {
   color: var(--color-muted);
   font-size: 14px;
   line-height: 1.58;
+  word-break: keep-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .newsletter-item time {
@@ -492,8 +497,8 @@ body {
   min-height: 22px;
   background: #f1f4f8;
   color: var(--color-subdued);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .newsletter-meta span:first-child {
@@ -577,7 +582,7 @@ body {
 .newsletter-card p {
   margin: 14px 0 0;
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.46;
   word-break: keep-all;
   overflow: hidden;
@@ -739,8 +744,8 @@ body {
 }
 
 .subscribe-card h2 {
-  font-size: 21px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .featured-link {
