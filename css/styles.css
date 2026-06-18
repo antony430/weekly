@@ -1088,7 +1088,12 @@ img {
   justify-content: center;
   padding: 22px;
   box-sizing: border-box;
+  overflow-y: auto;
   
+}
+
+.issue-modal[data-closing="true"] {
+  pointer-events: none;
 }
 
 .issue-modal-backdrop {
@@ -1096,12 +1101,14 @@ img {
   inset: 0;
   background: rgba(7, 17, 29, 0.68);
   backdrop-filter: blur(8px);
+  will-change: opacity;
 }
 
 .issue-modal-panel {
   position: relative;
-  width: min(940px, calc(100vw - 44px));
+  width: min(1024px, calc(100vw - 44px));
   /*height: min(88svh, calc(100svh - 44px));*/
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1110,6 +1117,24 @@ img {
   border-radius: 24px;
   background: transparent;
   box-shadow: 0 24px 52px rgba(31, 38, 48, 0.08);
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.issue-modal:not([hidden]) .issue-modal-backdrop {
+  animation: issueBackdropIn 180ms ease-out both;
+}
+
+.issue-modal:not([hidden]) .issue-modal-panel {
+  animation: issueDetailModalIn 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.issue-modal[data-closing="true"] .issue-modal-backdrop {
+  animation: issueBackdropOut 170ms ease-in both;
+}
+
+.issue-modal[data-closing="true"] .issue-modal-panel {
+  animation: issueDetailModalOut 170ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 .issue-browser-shell {
@@ -1117,7 +1142,6 @@ img {
   width: 100%;
   aspect-ratio: 1440 / 1160;
   height: auto;
-  max-height: 88svh;
   flex: 0 1 auto;
   overflow: hidden;
   box-shadow: none;
@@ -1174,6 +1198,12 @@ img {
   width: 100%;
   height: 100%;
   z-index: 0;
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.issue-modal[data-loading="true"] .issue-frame-wrap {
+  opacity: 0;
 }
 
 .issue-modal-close {
@@ -1612,6 +1642,78 @@ img {
   display: none;
 }
 
+@keyframes issueBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes issueBackdropOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes issueDetailModalIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 33px, 0) scale(0.8);
+  }
+
+  58% {
+    opacity: 1;
+    transform: translate3d(0, -7px, 0) scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes issueDetailModalOut {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .issue-modal:not([hidden]) .issue-modal-backdrop,
+  .issue-modal:not([hidden]) .issue-modal-panel,
+  .issue-modal[data-closing="true"] .issue-modal-backdrop,
+  .issue-modal[data-closing="true"] .issue-modal-panel {
+    animation: none;
+  }
+
+  .issue-frame-wrap {
+    transition: none;
+  }
+}
+
+@media (max-height: 900px) {
+  .issue-modal {
+    align-items: flex-start;
+  }
+
+  .issue-modal-panel {
+    margin-bottom: 104px;
+  }
+}
+
 @media (max-width: 840px) {
   .issue-modal {
     padding: 16px;
@@ -1625,7 +1727,6 @@ img {
     aspect-ratio: 760 / 1152;
     border-radius: 28px;
     width: 100%;
-    max-height: calc(100svh - 88px);
     --issue-browser-chrome-height: 0%;
     --issue-browser-body-top: 0%;
     --issue-browser-body-height: 100%;
@@ -1688,8 +1789,9 @@ img {
   padding: 14px 18px;
   border: 1px solid rgba(6, 27, 49, 0.08);
   border-radius: 999px;
-  background: rgba(17, 19, 23, 0.88);
-  backdrop-filter: blur(10px);
+  background: rgba(17, 19, 23, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  backdrop-filter: blur(18px) saturate(1.18);
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
@@ -1710,7 +1812,7 @@ img {
 }
 
 .toast.is-error {
-  background: rgba(180, 35, 24, 0.9);
+  background: rgba(180, 35, 24, 0.78);
 }
 
 .toast.is-success::before {
@@ -1738,7 +1840,7 @@ img {
 
 @media (max-width: 1024px){
   .issue-browser-shell {
-    width: 88vh;
+    width: 100%;
   }
 }
 
@@ -3253,7 +3355,8 @@ body {
   border-radius: 28px;
   background: linear-gradient(180deg, #0a0e14 0%, #434b59 48%, #171f2d 100%);
   color: #ffffff;
-  overflow: clip;
+  /*overflow: clip;*/
+  clip-path: inset(0 round 28px);
 }
 
 .visual-hero-surface {

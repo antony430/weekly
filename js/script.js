@@ -577,6 +577,8 @@ const consentNoticeDocument = {
 const LEGACY_NEWSLETTER_DATA_URL = "assets/legacy-newsletters.json";
 const DAILY_NEWSLETTER_CACHE_KEY = "newming-weekly-daily-latest";
 const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
+const ISSUE_MODAL_OPEN_DURATION_MS = 460;
+const ISSUE_MODAL_CLOSE_DURATION_MS = 190;
 
 let legacyNewsletters = [];
 let dailyNewsletter = null;
@@ -584,6 +586,8 @@ let newsletters = [];
 let newsletterFeatured = null;
 let recaptchaLoaderPromise = null;
 let pendingSubscriptionEmail = "";
+let issueModalCloseTimer = null;
+let issueModalToastTimer = null;
 
 const rssSources = {
   sports: {
@@ -975,6 +979,60 @@ function formatIssueDate(value) {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   return `${year}년 ${month}월 ${day}일 발행`;
+}
+
+function getIssueDateParts(value) {
+  if (!value) return null;
+
+  const normalized = String(value).trim();
+  const explicitDate = normalized.match(/(\d{4})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})/);
+  const hasTimeContext = /[Tt]\d{2}:\d{2}|Z$|[+-]\d{2}:?\d{2}$/.test(normalized);
+  if (explicitDate && !hasTimeContext) {
+    return {
+      month: Number(explicitDate[2]),
+      day: Number(explicitDate[3]),
+    };
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return {
+    month: Number(map.month),
+    day: Number(map.day),
+  };
+}
+
+function getIssuePublishedToastMessage(issue) {
+  const parts = [
+    issue?.issueDate,
+    issue?.sentAt,
+    issue?.date,
+    issue?.publishedAt,
+    issue?.createdAt,
+  ]
+    .map(getIssueDateParts)
+    .find(Boolean);
+
+  if (!parts) return "";
+  if (currentLanguage === "en") {
+    const date = new Date(Date.UTC(2000, parts.month - 1, parts.day));
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    }).format(date);
+    return `📨 This is the Newming Weekly issue published on ${formattedDate}.`;
+  }
+
+  return `📨 ${parts.month}월 ${parts.day}일 발행된 뉴밍 위클리입니다.`;
 }
 
 function getNewsletterDetailUrl(item) {
@@ -1600,15 +1658,15 @@ function setSubmitLoading(form, isLoading) {
 
 let toastTimer;
 
-function showToast(message, isError = false) {
+function showToast(message, isError = false, variant = isError ? "error" : "success") {
   const toast = $("[data-toast]");
   if (!toast) return;
 
   clearTimeout(toastTimer);
+  toast.classList.remove("is-visible", "is-error", "is-success", "is-notice");
   toast.textContent = message;
   toast.hidden = false;
-  toast.classList.toggle("is-error", isError);
-  toast.classList.toggle("is-success", !isError);
+  toast.classList.add(`is-${variant}`);
   requestAnimationFrame(() => toast.classList.add("is-visible"));
 
   toastTimer = setTimeout(() => {
@@ -1617,6 +1675,7 @@ function showToast(message, isError = false) {
       toast.hidden = true;
       toast.classList.remove("is-error");
       toast.classList.remove("is-success");
+      toast.classList.remove("is-notice");
     }, 180);
   }, 2600);
 }
@@ -2022,13 +2081,54 @@ function bindConsentModal() {
   });
 }
 
+function getIssueModalCloseDelay() {
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return 0;
+  return ISSUE_MODAL_CLOSE_DURATION_MS;
+}
+
+function getIssueModalOpenDelay() {
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return 0;
+  return ISSUE_MODAL_OPEN_DURATION_MS;
+}
+
+function scheduleIssueModalToast(modal, message, openedAt) {
+  if (!message) return false;
+
+  window.clearTimeout(issueModalToastTimer);
+  const elapsed = Date.now() - openedAt;
+  const delay = Math.max(getIssueModalOpenDelay() - elapsed, 0);
+  issueModalToastTimer = window.setTimeout(() => {
+    if (!modal || modal.hidden || modal.dataset.closing === "true") return;
+    showToast(message, false, "notice");
+  }, delay);
+  return true;
+}
+
+function finishIssueModalLoading(modal, loading) {
+  if (loading) loading.hidden = true;
+  requestAnimationFrame(() => {
+    if (!modal || modal.hidden || modal.dataset.closing === "true") return;
+    modal.dataset.loading = "false";
+  });
+}
+
 function closeIssueModal() {
   const modal = $("[data-issue-modal]");
   const frame = $("[data-issue-frame]");
-  if (!modal) return;
-  modal.hidden = true;
-  syncModalOpenState();
-  if (frame) frame.removeAttribute("srcdoc");
+  if (!modal || modal.hidden || modal.dataset.closing === "true") return;
+
+  window.clearTimeout(issueModalCloseTimer);
+  window.clearTimeout(issueModalToastTimer);
+  modal.dataset.closing = "true";
+  modal.dataset.loading = "true";
+
+  issueModalCloseTimer = window.setTimeout(() => {
+    modal.hidden = true;
+    delete modal.dataset.closing;
+    delete modal.dataset.loading;
+    syncModalOpenState();
+    if (frame) frame.removeAttribute("srcdoc");
+  }, getIssueModalCloseDelay());
 }
 
 async function openIssueModal(issueKey, fallbackUrl) {
@@ -2040,16 +2140,27 @@ async function openIssueModal(issueKey, fallbackUrl) {
     return;
   }
 
+  window.clearTimeout(issueModalCloseTimer);
+  window.clearTimeout(issueModalToastTimer);
+  const modalOpenedAt = Date.now();
+  delete modal.dataset.closing;
+  modal.dataset.loading = "true";
   modal.hidden = false;
   syncModalOpenState();
   if (loading) loading.hidden = false;
   frame.removeAttribute("srcdoc");
 
   const localIssue = newsletters.find((item) => String(item.detailKey || item.campaignKey || item.id) === String(issueKey));
+  let issueToastShown = false;
+  const localIssueToastMessage = getIssuePublishedToastMessage(localIssue);
+  if (localIssueToastMessage) {
+    scheduleIssueModalToast(modal, localIssueToastMessage, modalOpenedAt);
+    issueToastShown = true;
+  }
   if (localIssue?.detailHtml) {
     const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(localIssue.detailHtml));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(localIssue.summary?.ko || localIssue.summary?.en || localIssue.title?.ko || "")}</pre>`;
-    if (loading) loading.hidden = true;
+    finishIssueModalLoading(modal, loading);
     return;
   }
 
@@ -2074,6 +2185,10 @@ async function openIssueModal(issueKey, fallbackUrl) {
     const text = data?.item?.text;
     if (!data || (!html && !text)) throw new Error("Newsletter detail response is invalid");
 
+    if (!issueToastShown) {
+      const detailIssueToastMessage = getIssuePublishedToastMessage(data.item);
+      issueToastShown = scheduleIssueModalToast(modal, detailIssueToastMessage, modalOpenedAt);
+    }
     const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(html));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(text)}</pre>`;
   } catch (error) {
@@ -2081,7 +2196,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
     closeIssueModal();
     if (fallbackUrl) window.open(fallbackUrl, "_blank", "noreferrer");
   } finally {
-    if (loading) loading.hidden = true;
+    finishIssueModalLoading(modal, loading);
   }
 }
 
