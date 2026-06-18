@@ -805,8 +805,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  width: fit-content;
-  max-width: none;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 32px);
   padding: 14px 18px;
   border: 1px solid rgba(6, 27, 49, 0.08);
   border-radius: 999px;
@@ -816,6 +817,7 @@
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
+  line-height: 1.45;
   opacity: 0;
   pointer-events: none;
   white-space: normal;
@@ -858,4 +860,3 @@
   border-left: 2px solid #ffffff;
   transform: translateY(-60%) rotate(-45deg);
 }
-
