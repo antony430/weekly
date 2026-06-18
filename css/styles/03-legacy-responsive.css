@@ -120,6 +120,10 @@
     grid-column: auto;
   }
 
+  .right-rail__ad:not(.is-filled) {
+    display: none;
+  }
+
   .two-column-section,
   .content-band,
   .intelligence-section,
@@ -183,4 +187,3 @@
     aspect-ratio: 16 / 9;
   }
 }
-

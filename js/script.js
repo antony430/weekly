@@ -2287,6 +2287,7 @@ function bindRssTabs() {
 function setAdropFallbackVisible(slot, isVisible) {
   const fallback = slot?.querySelector("[data-adrop-fallback]");
   if (fallback) fallback.hidden = !isVisible;
+  slot?.closest(".right-rail__ad")?.classList.toggle("is-filled", false);
 }
 
 function waitForAdropSdk() {
@@ -2322,6 +2323,7 @@ function renderAdropCreative(slot, adHtml) {
 
   const fallback = slot.querySelector("[data-adrop-fallback]");
   slot.insertBefore(creative, fallback);
+  slot.closest(".right-rail__ad")?.classList.add("is-filled");
 }
 
 async function initAdropAds() {
