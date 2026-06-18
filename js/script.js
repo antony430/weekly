@@ -74,8 +74,8 @@ const content = {
     heroLayerLeftLabel: "클러스터링 뉴스",
     heroLayerLeftTitle: "8개 주요 언론사 기사",
     heroLayerLeftCopy: "같은 흐름을 묶어 읽기 쉽게 정리합니다.",
-    heroLayerRightLabel: "뉴스레터 대상자 수",
-    heroLayerRightTitle: "13,948명",
+    heroLayerRightLabel: "뉴스레터 구독자 수",
+    heroLayerRightTitle: "13,950명",
     heroLayerRightCopy: "최근 7일 기준",
     freeContent: "추천 무료 콘텐츠",
     newmingNews: "뉴스",
@@ -246,8 +246,8 @@ const content = {
     heroLayerLeftLabel: "Clustering news",
     heroLayerLeftTitle: "8 stories from major outlets",
     heroLayerLeftCopy: "Grouped by the same flow for easier reading.",
-    heroLayerRightLabel: "Newsletter audience",
-    heroLayerRightTitle: "13,948",
+    heroLayerRightLabel: "Newsletter subscribers",
+    heroLayerRightTitle: "13,950",
     heroLayerRightCopy: "Recent 7 days",
     freeContent: "Recommended free content",
     newmingNews: "News",
@@ -725,7 +725,7 @@ let newsletterArchiveHasMore = false;
 let newsletterArchiveLoading = false;
 let newslettersLoading = true;
 let newsletterLoadStarted = false;
-let audienceTargetCount = null;
+let audienceSubscriberCount = null;
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
@@ -921,16 +921,16 @@ function animateCountUps(root = document) {
   }, 650);
 }
 
-function getAudienceTargetCount(summary) {
-  const count = Number(summary?.counts?.operatingApiTargetCount);
+function getAudienceSubscriberCount(summary) {
+  const count = Number(summary?.counts?.mergedOriginalCount);
   return Number.isFinite(count) && count > 0 ? count : null;
 }
 
-function renderAudienceTargetCount(options = {}) {
+function renderAudienceSubscriberCount(options = {}) {
   const node = $("[data-subscriber-count]");
-  if (!node || audienceTargetCount === null) return;
+  if (!node || audienceSubscriberCount === null) return;
 
-  node.dataset.countUp = String(audienceTargetCount);
+  node.dataset.countUp = String(audienceSubscriberCount);
   node.dataset.countAnimated = "";
 
   if (options.animate) {
@@ -938,7 +938,7 @@ function renderAudienceTargetCount(options = {}) {
     return;
   }
 
-  updateCountUpDisplay(node, audienceTargetCount);
+  updateCountUpDisplay(node, audienceSubscriberCount);
 }
 
 async function fetchAudienceSummary() {
@@ -953,11 +953,11 @@ async function fetchAudienceSummary() {
       const data = await response.json();
       if (data?.ok === false) continue;
 
-      const nextCount = getAudienceTargetCount(data);
+      const nextCount = getAudienceSubscriberCount(data);
       if (nextCount === null) continue;
 
-      audienceTargetCount = nextCount;
-      renderAudienceTargetCount({ animate: true });
+      audienceSubscriberCount = nextCount;
+      renderAudienceSubscriberCount({ animate: true });
       return;
     } catch (error) {
       console.info("Audience summary request failed.", error);
@@ -1201,7 +1201,7 @@ function applyLanguage(language) {
   $$("[data-i18n-title]").forEach((node) => {
     node.setAttribute("title", translate(node.dataset.i18nTitle));
   });
-  renderAudienceTargetCount();
+  renderAudienceSubscriberCount();
   $$("[data-lang-option]").forEach((button) => {
     const isActive = button.dataset.langOption === language;
     button.setAttribute("aria-pressed", String(isActive));
