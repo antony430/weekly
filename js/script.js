@@ -574,6 +574,7 @@ const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
 const ADROP_APP_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6IjAxSzlWQzkyVjlDV1E2TUI3SkZQSDg5TUEzOjAxS1RRVk4zMzlUUlYxNlNERFIxNVY0WVM5IiwicGxhdGZvcm0iOiJ3ZWIiLCJrZXlUeXBlIjoxLCJpYXQiOjE3ODEwNjQ2OTgsImV4cCI6MzM1ODk4Nzg5OH0.sV6gVA2cKoFVglwHsO9KvZvVNBtm5-6eA6-y3f2Tsto";
 const ADROP_SDK_WAIT_MS = 2500;
+const NEWSLETTER_LOADING_MIN_MS = 700;
 const ISSUE_MODAL_OPEN_DURATION_MS = 460;
 const ISSUE_MODAL_CLOSE_DURATION_MS = 190;
 
@@ -729,10 +730,15 @@ let newsletterArchiveOffset = NEWSLETTER_LIST_LIMIT;
 let newsletterArchiveHasMore = false;
 let newsletterArchiveLoading = false;
 let newslettersLoading = true;
+let newsletterLoadStarted = false;
 let subscriberCount = null;
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
 
 function syncModalOpenState() {
   const hasOpenModal = [
@@ -1404,14 +1410,25 @@ function renderNewsletterMoreButton() {
   button.textContent = newsletterArchiveLoading ? translate("loadingMore") : translate("viewMore");
 }
 
+function renderNewsletterLoadingState() {
+  newslettersLoading = true;
+  renderNewsletters();
+  renderNewsletterCards();
+  renderNewsletterMoreButton();
+  revealStaggerItems($("[data-newsletter-list]"));
+  revealStaggerItems($("[data-newsletter-card-list]"));
+}
+
+async function waitForNewsletterLoadingMinimum(startedAt) {
+  const remaining = NEWSLETTER_LOADING_MIN_MS - (Date.now() - startedAt);
+  if (remaining > 0) await wait(remaining);
+}
+
 async function loadNewsletters() {
+  const loadingStartedAt = Date.now();
+
   if (!NEWSLETTER_API_URL) {
-    newslettersLoading = true;
-    renderNewsletters();
-    renderNewsletterCards();
-    renderNewsletterMoreButton();
-    revealStaggerItems($("[data-newsletter-list]"));
-    revealStaggerItems($("[data-newsletter-card-list]"));
+    renderNewsletterLoadingState();
     try {
       const legacyItems = await fetchLegacyNewsletterIssues();
       setNewsletterCollections(null, legacyItems);
@@ -1419,6 +1436,7 @@ async function loadNewsletters() {
       console.warn("Using empty newsletter fallback.", error);
       setNewsletterCollections(null, []);
     } finally {
+      await waitForNewsletterLoadingMinimum(loadingStartedAt);
       newslettersLoading = false;
       renderNewsletters();
       renderNewsletterMoreButton();
@@ -1428,12 +1446,7 @@ async function loadNewsletters() {
     return;
   }
 
-  newslettersLoading = true;
-  renderNewsletters();
-  renderNewsletterCards();
-  renderNewsletterMoreButton();
-  revealStaggerItems($("[data-newsletter-list]"));
-  revealStaggerItems($("[data-newsletter-card-list]"));
+  renderNewsletterLoadingState();
 
   try {
     const [apiResult, legacyResult] = await Promise.allSettled([
@@ -1472,12 +1485,40 @@ async function loadNewsletters() {
       setNewsletterCollections(null, []);
     }
   } finally {
+    await waitForNewsletterLoadingMinimum(loadingStartedAt);
     newslettersLoading = false;
     renderNewsletters();
     renderNewsletterMoreButton();
     revealStaggerItems($("[data-newsletter-list]"));
     revealStaggerItems($("[data-newsletter-card-list]"));
   }
+}
+
+function startNewsletterLoad() {
+  if (newsletterLoadStarted) return;
+  newsletterLoadStarted = true;
+  loadNewsletters();
+}
+
+function scheduleNewsletterLoad() {
+  renderNewsletterLoadingState();
+
+  const section = $("#letters");
+  if (!section || !("IntersectionObserver" in window)) {
+    startNewsletterLoad();
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      startNewsletterLoad();
+    },
+    { rootMargin: "0px 0px -18% 0px", threshold: 0.12 },
+  );
+
+  observer.observe(section);
 }
 
 async function loadMoreNewsletterArchives() {
@@ -2571,5 +2612,5 @@ bindMobileSubscribeFab();
 bindScrollMotion();
 bindLocalAutoReload();
 applyLanguage("ko");
-loadNewsletters();
+scheduleNewsletterLoad();
 fetchSubscriberStats();
