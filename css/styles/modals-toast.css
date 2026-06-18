@@ -146,8 +146,14 @@
   animation: issueBackdropIn 180ms ease-out both;
 }
 
-.issue-modal:not([hidden]) .issue-modal-panel {
+.issue-modal:not([hidden]):not([data-loading="true"]) .issue-modal-panel {
   animation: issueDetailModalIn 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.issue-modal[data-loading="true"]:not([data-closing="true"]) .issue-modal-panel {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 33px, 0) scale(0.8);
 }
 
 .issue-modal[data-closing="true"] .issue-modal-backdrop {

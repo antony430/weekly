@@ -2146,11 +2146,12 @@ function scheduleIssueModalToast(modal, message, openedAt) {
   return true;
 }
 
-function finishIssueModalLoading(modal, loading) {
+function finishIssueModalLoading(modal, loading, toastMessage = "") {
   if (loading) loading.hidden = true;
   requestAnimationFrame(() => {
     if (!modal || modal.hidden || modal.dataset.closing === "true") return;
     modal.dataset.loading = "false";
+    if (toastMessage) scheduleIssueModalToast(modal, toastMessage, Date.now());
   });
 }
 
@@ -2184,7 +2185,6 @@ async function openIssueModal(issueKey, fallbackUrl) {
 
   window.clearTimeout(issueModalCloseTimer);
   window.clearTimeout(issueModalToastTimer);
-  const modalOpenedAt = Date.now();
   delete modal.dataset.closing;
   modal.dataset.loading = "true";
   modal.hidden = false;
@@ -2193,16 +2193,11 @@ async function openIssueModal(issueKey, fallbackUrl) {
   frame.removeAttribute("srcdoc");
 
   const localIssue = newsletters.find((item) => String(item.detailKey || item.campaignKey || item.id) === String(issueKey));
-  let issueToastShown = false;
-  const localIssueToastMessage = getIssuePublishedToastMessage(localIssue);
-  if (localIssueToastMessage) {
-    scheduleIssueModalToast(modal, localIssueToastMessage, modalOpenedAt);
-    issueToastShown = true;
-  }
+  let issueToastMessage = getIssuePublishedToastMessage(localIssue);
   if (localIssue?.detailHtml) {
     const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(localIssue.detailHtml));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(localIssue.summary?.ko || localIssue.summary?.en || localIssue.title?.ko || "")}</pre>`;
-    finishIssueModalLoading(modal, loading);
+    finishIssueModalLoading(modal, loading, issueToastMessage);
     return;
   }
 
@@ -2227,10 +2222,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
     const text = data?.item?.text;
     if (!data || (!html && !text)) throw new Error("Newsletter detail response is invalid");
 
-    if (!issueToastShown) {
-      const detailIssueToastMessage = getIssuePublishedToastMessage(data.item);
-      issueToastShown = scheduleIssueModalToast(modal, detailIssueToastMessage, modalOpenedAt);
-    }
+    if (!issueToastMessage) issueToastMessage = getIssuePublishedToastMessage(data.item);
     const cleanedHtml = injectIssueViewportStyles(stripNewsletterFooter(html));
     frame.srcdoc = cleanedHtml || `<pre style="white-space:pre-wrap;font:16px/1.6 sans-serif;padding:24px;">${escapeHtml(text)}</pre>`;
   } catch (error) {
@@ -2238,7 +2230,7 @@ async function openIssueModal(issueKey, fallbackUrl) {
     closeIssueModal();
     if (fallbackUrl) window.open(fallbackUrl, "_blank", "noreferrer");
   } finally {
-    finishIssueModalLoading(modal, loading);
+    finishIssueModalLoading(modal, loading, issueToastMessage);
   }
 }
 
