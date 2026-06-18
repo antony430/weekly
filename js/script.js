@@ -2,8 +2,9 @@ const NEWSLETTER_API_PATH = "/api/newsletter/issues";
 const NEWSLETTER_API_URL = NEWSLETTER_API_PATH;
 const SUBSCRIBE_API_PATH = "/api/newsletter/subscribers";
 const SUBSCRIBE_API_URL = SUBSCRIBE_API_PATH;
-const SUBSCRIBER_STATS_API_PATH = `${SUBSCRIBE_API_PATH}/stats`;
-const SUBSCRIBER_STATS_API_URL = SUBSCRIBER_STATS_API_PATH;
+const AUDIENCE_SUMMARY_API_PATH = "/api/newsletter/audience/summary";
+const AUDIENCE_SUMMARY_API_URL = AUDIENCE_SUMMARY_API_PATH;
+const AUDIENCE_SUMMARY_RANGE_PRESET = "recent_7d";
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
 const CONSENT_NOTICE_URL =
@@ -73,9 +74,9 @@ const content = {
     heroLayerLeftLabel: "클러스터링 뉴스",
     heroLayerLeftTitle: "8개 주요 언론사 기사",
     heroLayerLeftCopy: "같은 흐름을 묶어 읽기 쉽게 정리합니다.",
-    heroLayerRightLabel: "구독 신청자 수",
-    heroLayerRightTitle: "13,920명",
-    heroLayerRightCopy: "6월 기준",
+    heroLayerRightLabel: "뉴스레터 대상자 수",
+    heroLayerRightTitle: "13,948명",
+    heroLayerRightCopy: "최근 7일 기준",
     freeContent: "추천 무료 콘텐츠",
     newmingNews: "뉴스",
     newsletterCardTitle: "지난 뉴스레터",
@@ -245,9 +246,9 @@ const content = {
     heroLayerLeftLabel: "Clustering news",
     heroLayerLeftTitle: "8 stories from major outlets",
     heroLayerLeftCopy: "Grouped by the same flow for easier reading.",
-    heroLayerRightLabel: "Subscriber count",
-    heroLayerRightTitle: "13,920",
-    heroLayerRightCopy: "As of June",
+    heroLayerRightLabel: "Newsletter audience",
+    heroLayerRightTitle: "13,948",
+    heroLayerRightCopy: "Recent 7 days",
     freeContent: "Recommended free content",
     newmingNews: "News",
     newsletterCardTitle: "Previous newsletters",
@@ -745,7 +746,7 @@ let newsletterArchiveHasMore = false;
 let newsletterArchiveLoading = false;
 let newslettersLoading = true;
 let newsletterLoadStarted = false;
-let subscriberCount = null;
+let audienceTargetCount = null;
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
@@ -1017,17 +1018,16 @@ function animateCountUps(root = document) {
   }, 650);
 }
 
-function getSubscriberCountFromStats(stats) {
-  const candidates = [stats?.allTimeCount, stats?.totalCount, stats?.activeCount];
-  const count = candidates.map(Number).find((value) => Number.isFinite(value) && value >= 0);
-  return Number.isFinite(count) ? count : null;
+function getAudienceTargetCount(summary) {
+  const count = Number(summary?.counts?.operatingApiTargetCount);
+  return Number.isFinite(count) && count > 0 ? count : null;
 }
 
-function renderSubscriberCount(options = {}) {
+function renderAudienceTargetCount(options = {}) {
   const node = $("[data-subscriber-count]");
-  if (!node || subscriberCount === null) return;
+  if (!node || audienceTargetCount === null) return;
 
-  node.dataset.countUp = String(subscriberCount);
+  node.dataset.countUp = String(audienceTargetCount);
   node.dataset.countAnimated = "";
 
   if (options.animate) {
@@ -1035,28 +1035,29 @@ function renderSubscriberCount(options = {}) {
     return;
   }
 
-  updateCountUpDisplay(node, subscriberCount);
+  updateCountUpDisplay(node, audienceTargetCount);
 }
 
-async function fetchSubscriberStats() {
-  const urls = [SUBSCRIBER_STATS_API_URL].filter(Boolean);
+async function fetchAudienceSummary() {
+  const urls = [AUDIENCE_SUMMARY_API_URL].filter(Boolean);
 
   for (const url of urls) {
     try {
-      const response = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
+      const params = new URLSearchParams({ rangePreset: AUDIENCE_SUMMARY_RANGE_PRESET });
+      const response = await fetch(`${url}?${params}`, { cache: "no-store" });
       if (!response.ok) continue;
 
       const data = await response.json();
       if (data?.ok === false) continue;
 
-      const nextCount = getSubscriberCountFromStats(data);
+      const nextCount = getAudienceTargetCount(data);
       if (nextCount === null) continue;
 
-      subscriberCount = nextCount;
-      renderSubscriberCount({ animate: true });
+      audienceTargetCount = nextCount;
+      renderAudienceTargetCount({ animate: true });
       return;
     } catch (error) {
-      console.info("Subscriber stats request failed.", error);
+      console.info("Audience summary request failed.", error);
     }
   }
 }
@@ -1297,7 +1298,7 @@ function applyLanguage(language) {
   $$("[data-i18n-title]").forEach((node) => {
     node.setAttribute("title", translate(node.dataset.i18nTitle));
   });
-  renderSubscriberCount();
+  renderAudienceTargetCount();
   $$("[data-lang-option]").forEach((button) => {
     const isActive = button.dataset.langOption === language;
     button.setAttribute("aria-pressed", String(isActive));
@@ -1948,7 +1949,7 @@ function bindForms() {
         if (result.ok) {
           setFormMessage(form, "");
           showToast(translate("success"));
-          fetchSubscriberStats();
+          fetchAudienceSummary();
           form.reset();
           return;
         }
@@ -2043,7 +2044,7 @@ function bindModal() {
       if (result.ok) {
         setFormMessage(modalForm, "");
         showToast(translate("success"));
-        fetchSubscriberStats();
+        fetchAudienceSummary();
         pendingSubscriptionEmail = "";
         modalForm.reset();
         closeModal();
@@ -2542,4 +2543,4 @@ bindScrollMotion();
 bindLocalAutoReload();
 applyLanguage("ko");
 scheduleNewsletterLoad();
-fetchSubscriberStats();
+fetchAudienceSummary();
