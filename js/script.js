@@ -577,6 +577,9 @@ const consentNoticeDocument = {
 const LEGACY_NEWSLETTER_DATA_URL = "assets/legacy-newsletters.json";
 const DAILY_NEWSLETTER_CACHE_KEY = "newming-weekly-daily-latest";
 const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
+const ADROP_APP_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6IjAxSzlWQzkyVjlDV1E2TUI3SkZQSDg5TUEzOjAxS1RRVk4zMzlUUlYxNlNERFIxNVY0WVM5IiwicGxhdGZvcm0iOiJ3ZWIiLCJrZXlUeXBlIjoxLCJpYXQiOjE3ODEwNjQ2OTgsImV4cCI6MzM1ODk4Nzg5OH0.sV6gVA2cKoFVglwHsO9KvZvVNBtm5-6eA6-y3f2Tsto";
+const ADROP_SDK_WAIT_MS = 2500;
 const ISSUE_MODAL_OPEN_DURATION_MS = 460;
 const ISSUE_MODAL_CLOSE_DURATION_MS = 190;
 
@@ -2242,14 +2245,102 @@ function bindRssTabs() {
   });
 }
 
+function setAdropFallbackVisible(slot, isVisible) {
+  const fallback = slot?.querySelector("[data-adrop-fallback]");
+  if (fallback) fallback.hidden = !isVisible;
+}
+
+function waitForAdropSdk() {
+  if (window.adrop?.initialize && window.adrop?.request) return Promise.resolve(window.adrop);
+
+  return new Promise((resolve, reject) => {
+    const startedAt = Date.now();
+    const poll = () => {
+      if (window.adrop?.initialize && window.adrop?.request) {
+        resolve(window.adrop);
+        return;
+      }
+
+      if (Date.now() - startedAt >= ADROP_SDK_WAIT_MS) {
+        reject(new Error("Adrop SDK did not load"));
+        return;
+      }
+
+      window.setTimeout(poll, 50);
+    };
+
+    poll();
+  });
+}
+
+function renderAdropCreative(slot, adHtml) {
+  slot.querySelector("[data-adrop-rendered]")?.remove();
+
+  const creative = document.createElement("div");
+  creative.className = "ad-banner__creative";
+  creative.dataset.adropRendered = "";
+  creative.innerHTML = adHtml;
+
+  const fallback = slot.querySelector("[data-adrop-fallback]");
+  slot.insertBefore(creative, fallback);
+}
+
+async function initAdropAds() {
+  const slots = $$("[data-adrop-slot][data-adrop-unit]");
+  if (!slots.length) return;
+
+  slots.forEach((slot) => setAdropFallbackVisible(slot, false));
+
+  try {
+    const adropSdk = await waitForAdropSdk();
+    adropSdk.initialize(ADROP_APP_KEY);
+
+    await Promise.all(
+      slots.map(async (slot) => {
+        const unitId = slot.dataset.adropUnit;
+        const response = await adropSdk.request(unitId);
+
+        if (!response?.ad) {
+          throw new Error(response?.message || `Adrop returned no ad for ${unitId}`);
+        }
+
+        renderAdropCreative(slot, response.ad);
+      }),
+    );
+  } catch (error) {
+    console.info("Adrop ad initialization skipped.", error);
+    slots.forEach((slot) => setAdropFallbackVisible(slot, true));
+  }
+}
+
 function bindShare() {
-  $("[data-copy-link]")?.addEventListener("click", async () => {
+  $("[data-share-link]")?.addEventListener("click", async () => {
     const url = `${window.location.origin}${window.location.pathname}`;
+    const shareData = {
+      title: document.title,
+      text: document.querySelector('meta[name="description"]')?.content || translate("brand"),
+      url,
+    };
 
     try {
+      if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+        await navigator.share(shareData);
+        return;
+      }
+
       await navigator.clipboard.writeText(url);
       showToast(translate("copied"));
     } catch (error) {
+      if (error?.name === "AbortError") return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast(translate("copied"));
+        return;
+      } catch {
+        // Fall through to the user-facing failure message.
+      }
+
       showToast(translate("copyFailed"), true);
     }
   });
@@ -2465,6 +2556,7 @@ bindLanguageToggle();
 bindRssTabs();
 bindRssAutoRefresh();
 bindShare();
+initAdropAds();
 bindParallax();
 bindMobileSubscribeFab();
 bindScrollMotion();
