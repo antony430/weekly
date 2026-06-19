@@ -14,9 +14,15 @@ if [ ! -f "$SSH_KEY" ]; then
   exit 1
 fi
 
+# 0. 뉴스레터 API 기반 SEO 파일 갱신
+if [ "${SKIP_NEWSLETTER_SEO_SYNC:-0}" != "1" ] && [ -f "$LOCAL_DIR/scripts/sync-newsletter-seo.mjs" ]; then
+  echo "[준비] 뉴스레터 SEO 파일 동기화..."
+  node "$LOCAL_DIR/scripts/sync-newsletter-seo.mjs"
+fi
+
 # 1. 로컬 변경사항 확인
 if [ -n "$(git -C "$LOCAL_DIR" status --porcelain)" ]; then
-  echo "커밋되지 않은 변경사항이 있습니다. 먼저 커밋해주세요."
+  echo "커밋되지 않은 변경사항이 있습니다. SEO 동기화로 변경이 생겼다면 커밋 후 다시 배포해주세요."
   exit 1
 fi
 
@@ -44,7 +50,7 @@ ssh -i "$SSH_KEY" "$SSH_HOST" "mkdir -p '$REMOTE_DIR'"
 echo "[3/5] 공개 제외 파일 정리..."
 ssh -i "$SSH_KEY" "$SSH_HOST" "set -eu
 cd '$REMOTE_DIR'
-rm -rf docs email-templates output .playwright-cli .github
+rm -rf docs email-templates output .playwright-cli .github scripts
 rm -f styles.css .gitignore
 find . -type f \( -name '*.md' -o -name 'styles.css' \) -delete
 "
@@ -62,6 +68,7 @@ rsync -az --delete \
   --exclude "README.md" \
   --exclude "*.md" \
   --exclude "deploy-weekly.sh" \
+  --exclude "scripts/" \
   --exclude "node_modules/" \
   --exclude "docs/" \
   --exclude "email-templates/" \
