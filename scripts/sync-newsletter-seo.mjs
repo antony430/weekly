@@ -241,7 +241,7 @@ async function writeSitemap(issues) {
   const homeLastmod = maxDate(process.env.HOME_LASTMOD, existingHomeLastmod, latestIssueLastmod);
 
   const entries = [
-    sitemapEntry(`${SITE_ORIGIN}/`, homeLastmod, "weekly", "1.0"),
+    sitemapEntry(`${SITE_ORIGIN}/`, homeLastmod),
     ...issues.map((issue) => sitemapEntry(issue.url, issue.lastmod || issue.issueDate, "monthly", "0.8")),
   ];
 
@@ -255,11 +255,12 @@ ${entries.join("\n")}
 }
 
 function sitemapEntry(loc, lastmod, changefreq, priority) {
+  const changefreqTag = changefreq ? `\n    <changefreq>${escapeXml(changefreq)}</changefreq>` : "";
+  const priorityTag = priority ? `\n    <priority>${escapeXml(priority)}</priority>` : "";
+
   return `  <url>
     <loc>${escapeXml(loc)}</loc>
-    <lastmod>${escapeXml(lastmod)}</lastmod>
-    <changefreq>${escapeXml(changefreq)}</changefreq>
-    <priority>${escapeXml(priority)}</priority>
+    <lastmod>${escapeXml(lastmod)}</lastmod>${changefreqTag}${priorityTag}
   </url>`;
 }
 
