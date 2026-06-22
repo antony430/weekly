@@ -7,6 +7,7 @@ const AUDIENCE_SUMMARY_API_URL = AUDIENCE_SUMMARY_API_PATH;
 const AUDIENCE_SUMMARY_RANGE_PRESET = "recent_7d";
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
+const SUBSCRIBE_CONTEXT_ENABLED = false;
 const CONSENT_NOTICE_URL =
   "https://sites.google.com/newming.co.kr/weekly/241105-%ED%98%84%EC%9E%AC?authuser=2";
 const NEWSLETTER_LIST_LIMIT = 1;
@@ -578,6 +579,7 @@ let newsletters = [];
 let newsletterFeatured = null;
 let recaptchaLoaderPromise = null;
 let pendingSubscriptionEmail = "";
+let pendingSubscriptionPlacement = "";
 let issueModalCloseTimer = null;
 let issueModalToastTimer = null;
 
@@ -1715,20 +1717,58 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-async function subscribe(email, recaptchaToken = "", consent = false) {
+function getDeviceType() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 0;
+  if (width < 768) return "mobile";
+  if (width < 1024) return "tablet";
+  return "desktop";
+}
+
+function getSubscribeFormPlacement(form) {
+  if (!form) return "unknown";
+  if (form.classList.contains("hero-form")) return "hero";
+  if (form.classList.contains("bottom-signup-form")) return "bottom";
+  if (form.closest(".right-rail__subscribe")) return "rail";
+  if (form.closest(".modal-panel")) return pendingSubscriptionPlacement || "modal";
+  return "unknown";
+}
+
+function getSubscribeContext(form) {
+  return {
+    deviceType: getDeviceType(),
+    formPlacement: getSubscribeFormPlacement(form),
+    viewportWidth: window.innerWidth || document.documentElement.clientWidth || 0,
+  };
+}
+
+function appendSubscribeContext(payload, context = {}) {
+  if (!SUBSCRIBE_CONTEXT_ENABLED) return payload;
+
+  return {
+    ...payload,
+    deviceType: context.deviceType || getDeviceType(),
+    formPlacement: context.formPlacement || "unknown",
+    viewportWidth: context.viewportWidth || window.innerWidth || document.documentElement.clientWidth || 0,
+  };
+}
+
+async function subscribe(email, recaptchaToken = "", consent = false, context = {}) {
   const urls = [SUBSCRIBE_API_URL].filter(Boolean);
   if (!urls.length) {
     return { ok: true };
   }
 
-  const payload = {
-    email,
-    language: currentLanguage,
-    recaptchaAction: RECAPTCHA_ACTION,
-    recaptchaToken,
-    consent,
-    source: "homepage",
-  };
+  const payload = appendSubscribeContext(
+    {
+      email,
+      language: currentLanguage,
+      recaptchaAction: RECAPTCHA_ACTION,
+      recaptchaToken,
+      consent,
+      source: "homepage",
+    },
+    context,
+  );
 
   for (const url of urls) {
     try {
@@ -1846,7 +1886,7 @@ function bindForms() {
           return;
         }
 
-        const result = await subscribe(email, recaptchaToken, true);
+        const result = await subscribe(email, recaptchaToken, true, getSubscribeContext(form));
         setSubmitLoading(form, false);
 
         if (result.ok) {
@@ -1867,6 +1907,7 @@ function bindForms() {
       }
 
       pendingSubscriptionEmail = email;
+      pendingSubscriptionPlacement = getSubscribeFormPlacement(form);
       openModal();
     });
   });
@@ -1895,6 +1936,7 @@ function bindModal() {
   $$("[data-open-modal]").forEach((button) => {
     button.addEventListener("click", () => {
       pendingSubscriptionEmail = "";
+      pendingSubscriptionPlacement = button.closest(".mobile-subscribe-fab") ? "mobile_fab" : "modal";
       openModal();
     });
   });
@@ -1941,7 +1983,7 @@ function bindModal() {
         return;
       }
 
-      const result = await subscribe(email, recaptchaToken, consent);
+      const result = await subscribe(email, recaptchaToken, consent, getSubscribeContext(modalForm));
       setSubmitLoading(modalForm, false);
 
       if (result.ok) {
@@ -1949,6 +1991,7 @@ function bindModal() {
         showToast(translate("success"));
         fetchAudienceSummary();
         pendingSubscriptionEmail = "";
+        pendingSubscriptionPlacement = "";
         modalForm.reset();
         closeModal();
         return;
