@@ -11,7 +11,7 @@ const CONSENT_NOTICE_URL =
   "https://sites.google.com/newming.co.kr/weekly/241105-%ED%98%84%EC%9E%AC?authuser=2";
 const NEWSLETTER_LIST_LIMIT = 1;
 const NEWSLETTER_CARD_LIMIT = 6;
-const RSS_ITEM_LIMIT = 3;
+const RSS_ITEM_LIMIT = 5;
 const LINE_BREAK_DELIMITER = "||";
 const AUTO_RELOAD_FILES = [
   "index.html",
@@ -1561,7 +1561,7 @@ function renderRssMoreLink(source) {
   if (!source?.pageUrl) return "";
 
   return `
-    <a class="rss-more-link" href="${escapeHtml(source.pageUrl)}" target="_blank" rel="noreferrer">
+    <a class="rss-more-link" href="${escapeHtml(source.pageUrl)}" target="_blank" rel="noreferrer" hidden>
       ${translate("rssMore")}
     </a>
   `;

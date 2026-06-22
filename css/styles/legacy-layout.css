@@ -428,6 +428,10 @@
   font-weight: 500;
 }
 
+.rss-more-link[hidden] {
+  display: none;
+}
+
 .ad-block {
   display: grid;
   justify-items: center;
