@@ -8,6 +8,7 @@ const AUDIENCE_SUMMARY_RANGE_PRESET = "recent_7d";
 const RECAPTCHA_SITE_KEY = "6LcCMyItAAAAAAAkbnVH39kn-qzZf_2pUMKupNDm";
 const RECAPTCHA_ACTION = "subscribe";
 const SUBSCRIBE_CONTEXT_ENABLED = false;
+const SUBSCRIBE_API_TIMEOUT_MS = 10000;
 const CONSENT_NOTICE_URL =
   "https://sites.google.com/newming.co.kr/weekly/241105-%ED%98%84%EC%9E%AC?authuser=2";
 const NEWSLETTER_LIST_LIMIT = 1;
@@ -185,7 +186,7 @@ const content = {
     success: "구독 신청이 접수되었습니다.",
     submitting: "처리 중...",
     invalidEmail: "올바른 이메일 주소를 입력해주세요.",
-    subscribeError: "구독 신청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    subscribeError: "구독 신청자가 많아, 잠시 후 다시 신청해주세요.",
     recaptchaError: "보안 확인을 완료하지 못했습니다. 잠시 후 다시 시도해주세요.",
     recaptchaNoticePrefix: "이 사이트는 reCAPTCHA로 보호되며 Google",
     recaptchaPrivacy: "개인정보처리방침",
@@ -361,7 +362,7 @@ const content = {
     success: "Your subscription request has been received.",
     submitting: "Processing...",
     invalidEmail: "Please enter a valid email address.",
-    subscribeError: "We could not complete the subscription request. Please try again shortly.",
+    subscribeError: "Subscription requests are busy right now. Please try again shortly.",
     recaptchaError: "We could not complete the security check. Please try again shortly.",
     recaptchaNoticePrefix: "This site is protected by reCAPTCHA and the Google",
     recaptchaPrivacy: "Privacy Policy",
@@ -570,6 +571,7 @@ const LEGACY_NEWSLETTER_DATA_URL = "assets/legacy-newsletters.json";
 const DAILY_NEWSLETTER_CACHE_KEY = "newming-weekly-daily-latest";
 const RSS_CACHE_KEY_PREFIX = "newming-weekly-rss";
 const NEWSLETTER_LOADING_MIN_MS = 700;
+const NEWSLETTER_API_TIMEOUT_MS = 3000;
 const ISSUE_MODAL_OPEN_DURATION_MS = 460;
 const ISSUE_MODAL_CLOSE_DURATION_MS = 190;
 
@@ -734,6 +736,24 @@ const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(sel
 
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 0) {
+  if (!timeoutMs || typeof AbortController === "undefined") {
+    return fetch(url, options);
+  }
+
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 function syncModalOpenState() {
@@ -1051,7 +1071,7 @@ async function fetchNewsletterIssues(limit, offset) {
   let lastError;
   for (const url of urls) {
     try {
-      const response = await fetch(url, { cache: "no-store" });
+      const response = await fetchWithTimeout(url, { cache: "no-store" }, NEWSLETTER_API_TIMEOUT_MS);
       if (!response.ok) throw new Error("Newsletter API request failed");
 
       const data = await response.json();
@@ -1772,11 +1792,15 @@ async function subscribe(email, recaptchaToken = "", consent = false, context = 
 
   for (const url of urls) {
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+        SUBSCRIBE_API_TIMEOUT_MS,
+      );
 
       if (response.ok) return { ok: true };
     } catch (error) {
