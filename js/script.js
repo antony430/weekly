@@ -1601,7 +1601,9 @@ function renderRssFallback(category = currentRssCategory) {
     .map(
       (item) => `
         <a class="rss-item" href="${escapeHtml(item.link || source.url)}" data-stagger-item target="_blank" rel="noreferrer">
-          <img class="rss-thumb" src="${escapeHtml(item.image)}" alt="" loading="lazy" />
+          <div class="rss-thumb-frame">
+            <img class="rss-thumb" src="${escapeHtml(item.image)}" alt="" loading="lazy" />
+          </div>
           <span>
             <strong>${escapeHtml(item.title[currentLanguage])}</strong>
             <span>${escapeHtml(item.desc[currentLanguage])}</span>
@@ -1624,7 +1626,9 @@ function renderCachedRss(category = currentRssCategory, items = []) {
     .slice(0, RSS_ITEM_LIMIT)
     .map((item) => `
       <a class="rss-item" href="${escapeHtml(item.link || source.url)}" data-stagger-item target="_blank" rel="noreferrer">
-        <img class="rss-thumb" src="${escapeHtml(item.image || "assets/newming-weekly-icon.png")}" alt="" loading="lazy" />
+        <div class="rss-thumb-frame">
+          <img class="rss-thumb" src="${escapeHtml(item.image || "assets/newming-weekly-icon.png")}" alt="" loading="lazy" />
+        </div>
         <span>
           <strong>${escapeHtml(item.title || translate("rssFallback"))}</strong>
           <span>${escapeHtml(item.description || "")}</span>
